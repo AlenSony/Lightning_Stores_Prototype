@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="240" height="240" role="img"
+    aria-labelledby="title desc">
+    <title id="title">Lightning E-Store Icon</title>
+    <desc id="desc">A shopping-bag silhouette with a bold lightning bolt on a radiant circular
+        yellow gradient background.</desc>
+
+    <!-- subtle drop shadow -->
+    <defs>
+        <linearGradient id="g1" x1="0" x2="1">
+            <stop offset="0" stop-color="#FFE082" />
+            <stop offset="1" stop-color="#FFB300" />
+        </linearGradient>
+        <filter id="drop" x="-50%" y="-50%" width="200%" height="200%">
+            <feOffset in="SourceAlpha" dx="0" dy="3" result="off" />
+            <feGaussianBlur in="off" stdDeviation="4" result="blur" />
+            <feColorMatrix in="blur" type="matrix"
+                values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.18 0" result="shadow" />
+            <feBlend in="SourceGraphic" in2="shadow" />
+        </filter>
+    </defs>
+
+    <!-- background circle -->
+    <g filter="url(#drop)">
+        <circle cx="60" cy="50" r="42" fill="url(#g1)" />
+    </g>
+
+    <!-- shopping bag -->
+    <g transform="translate(26,28)">
+        <rect x="0" y="12" width="68" height="52" rx="8" ry="8" fill="#0D47A1" />
+        <!-- bag handle -->
+        <path d="M14 12 C14 4, 54 4, 54 12" fill="none" stroke="#073a86" stroke-width="4"
+            stroke-linecap="round" />
+        <!-- small highlight -->
+        <rect x="6" y="18" width="10" height="30" rx="3" ry="3" fill="#123f80" opacity="0.18" />
+    </g>
+
+    <!-- lightning bolt (on top of bag) -->
+    <g transform="translate(36,30)">
+        <path d="M12 6 L28 6 L18 26 L30 26 L8 54 L14 30 L4 30 Z"
+            fill="#FFFDE7" stroke="#FFCA28" stroke-width="2" stroke-linejoin="round" />
+    </g>
+</svg>
+  
