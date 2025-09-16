@@ -1,10 +1,10 @@
-import React from 'react'
-import LoginPage from './Components/LoginPage'
+import MainPage from './Components/MainPage.jsx';
+
 
 function App() {
   return (
-    <LoginPage />
+    <MainPage />
   )
 }
 
-export default App
+export default App;

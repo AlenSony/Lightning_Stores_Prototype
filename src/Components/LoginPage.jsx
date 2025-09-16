@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import LightRays from '../assets/LightRays';
 
 function LoginPage() {
@@ -65,7 +65,7 @@ function LoginPage() {
     }}>
       <LightRays
         raysOrigin="top-center"
-        raysColor="#ffffff"
+        raysColor="#1F75FE"
         raysSpeed={1.5}
         lightSpread={0.8}
         rayLength={1.2}

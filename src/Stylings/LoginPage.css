@@ -19,6 +19,7 @@ body, html {
   margin: 0;
   padding: 0;
   border: none;
+  transition: all 0.5s ease-in;
 }
 
 .custom-rays {
