@@ -1,8 +1,9 @@
 .container {
     position: relative;
     width: 100vw;
-    height: 100vh;
-    overflow: hidden;
+    min-height: 100vh;
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 
 .new-releases-container {
@@ -97,6 +98,85 @@
     width: 100%;
     text-align: center;
     margin-bottom: 20px;
+}
+
+/* Phone Cards Styling */
+.phone-cards-container {
+    width: 92%;
+    margin: 2rem auto;
+    padding: 1.5rem;
+    border-radius: 20px;
+    border: 1px solid rgba(31, 117, 254, 0.3);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15), 0 0 20px rgba(31, 117, 254, 0.1);
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+}
+
+.section-title {
+    text-align: center;
+    margin-bottom: 1.5rem;
+    color: #fff;
+    font-size: 1.8rem;
+    text-shadow: 0 0 10px rgba(31, 117, 254, 0.5);
+}
+
+.phone-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1.5rem;
+    justify-content: center;
+}
+
+.phone-card {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.phone-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(31, 117, 254, 0.2);
+}
+
+.phone-card-image {
+    height: 180px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.05);
+}
+
+.phone-card-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+}
+
+.phone-card:hover .phone-card-image img {
+    transform: scale(1.05);
+}
+
+.phone-card-info {
+    padding: 1rem;
+    text-align: center;
+}
+
+.phone-card-info h3 {
+    margin: 0 0 0.5rem;
+    font-size: 1rem;
+    color: #fff;
+}
+
+.phone-price {
+    font-weight: bold;
+    color: #1F75FE;
+    margin: 0;
+    font-size: 1.1rem;
 }
 
 .content-title h2 {
