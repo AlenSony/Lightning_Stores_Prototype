@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import Aurora from '../assets/Aurora.jsx';
+import CardComponent from '../assets/ComponentCard.jsx';
 import NavBar from '../assets/Navbar.jsx';
 import '../Stylings/MainPage.css';
 
@@ -64,102 +64,164 @@ function MainPage() {
         // iPhone models
         {
             name: "iPhone 16",
+            company: "Apple",
             price: 799,
+            description: "6.1-inch Super Retina XDR display with ProMotion, A18 chip, 48MP camera system",
+            ram: "6GB",
+            storage: "128GB",
             image: "/iphone/iphone-16.webp"
         },
         {
             name: "iPhone 16 Plus",
+            company: "Apple",
             price: 899,
+            description: "6.7-inch Super Retina XDR display with ProMotion, A18 chip, 48MP camera system",
+            ram: "6GB",
+            storage: "128GB",
             image: "/iphone/iphone-16-plus.webp"
         },
         {
             name: "iPhone 16 Pro",
+            company: "Apple",
             price: 999,
+            description: "6.1-inch Super Retina XDR display with ProMotion, A18 Pro chip, 48MP Pro camera system",
+            ram: "8GB",
+            storage: "256GB",
             image: "/iphone/iphone-16-pro.jpg"
         },
         {
             name: "iPhone 17",
+            company: "Apple",
             price: 899,
+            description: "6.1-inch Super Retina XDR display with ProMotion, A19 chip, 48MP camera system",
+            ram: "6GB",
+            storage: "128GB",
             image: "/iphone/iphone-17.webp"
         },
         {
             name: "iPhone 17 Pro",
+            company: "Apple",
             price: 1099,
+            description: "6.1-inch Super Retina XDR display with ProMotion, A19 Pro chip, 48MP Pro camera system",
+            ram: "8GB",
+            storage: "256GB",
             image: "/iphone/iphone-17-pro.webp"
         },
         {
             name: "iPhone 17 Pro Max",
+            company: "Apple",
             price: 1199,
+            description: "6.7-inch Super Retina XDR display with ProMotion, A19 Pro chip, 48MP Pro camera system",
+            ram: "8GB",
+            storage: "256GB",
             image: "/iphone/iphone-17-pro-max.webp"
         },
         // Samsung models
         {
             name: "Samsung S25",
+            company: "Samsung",
             price: 799,
+            description: "6.4-inch Dynamic AMOLED 2X display, Snapdragon 8 Elite, 200MP camera",
+            ram: "8GB",
+            storage: "256GB",
             image: "/samsung/samsung-s25.png"
         },
         {
             name: "Samsung S25 Plus",
+            company: "Samsung",
             price: 999,
+            description: "6.6-inch Dynamic AMOLED 2X display, Snapdragon 8 Elite, 200MP camera",
+            ram: "12GB",
+            storage: "256GB",
             image: "/samsung/samsung-s25-plus.png"
         },
         {
             name: "Samsung S25 Ultra",
+            company: "Samsung",
             price: 1199,
+            description: "6.8-inch Dynamic AMOLED 2X display, Snapdragon 8 Elite, 200MP camera system",
+            ram: "16GB",
+            storage: "512GB",
             image: "/samsung/samsung-s25-ultra.png"
         },
         {
             name: "Samsung S25 Edge",
+            company: "Samsung",
             price: 1099,
-            image: "/samsung/samsung-s25-edge.jpg"
+            description: "6.7-inch Dynamic AMOLED 2X display, Snapdragon 8 Elite, curved edge design",
+            ram: "12GB",
+            storage: "256GB",
+            image: "/samsung/samsung_s25_edge.png",
         },
         {
             name: "Samsung Z Flip 7",
+            company: "Samsung",
             price: 999,
+            description: "Foldable dynamic AMOLED display, Snapdragon 8 Elite, 12MP dual camera",
+            ram: "12GB",
+            storage: "256GB",
             image: "/samsung/samsung-z-flip-7.png"
         },
         // Nothing models
         {
             name: "Nothing Phone 3",
+            company: "Nothing",
             price: 699,
+            description: "6.67-inch AMOLED display, Snapdragon 8s Gen 4, 50MP triple camera",
+            ram: "12GB",
+            storage: "256GB",
             image: "/nothing/nothing-phone-3.webp"
         },
         {
             name: "Nothing Phone 3 Black",
+            company: "Nothing",
             price: 699,
+            description: "6.67-inch AMOLED display, Snapdragon 8s Gen 4, 50MP triple camera",
+            ram: "12GB",
+            storage: "256GB",
             image: "/nothing/nothing-phone-3-black.webp"
         },
         {
             name: "Nothing Phone 3a Pro",
+            company: "Nothing",
             price: 499,
+            description: "Mid-range smartphone with AMOLED display, 50MP camera system",
+            ram: "8GB",
+            storage: "128GB",
             image: "/nothing/nothing-phone-3a-pro.jpg"
         },
         // Vivo models
         {
             name: "Vivo X200",
+            company: "Vivo",
             price: 699,
+            description: "6.78-inch AMOLED display, Dimensity 9300 chipset, 50MP camera system",
+            ram: "12GB",
+            storage: "256GB",
             image: "/vivo/vivo-x200.webp"
         },
         {
             name: "Vivo X200 Pro",
+            company: "Vivo",
             price: 899,
+            description: "6.78-inch AMOLED display, Dimensity 9300+ chipset, 64MP camera system",
+            ram: "16GB",
+            storage: "512GB",
             image: "/vivo/vivo-x200-pro.jpg"
         },
         {
             name: "Vivo X200 FE",
+            company: "Vivo",
             price: 599,
+            description: "Fan edition with AMOLED display, Dimensity 8300 chipset",
+            ram: "8GB",
+            storage: "128GB",
             image: "/vivo/vivo-x200-fe.webp"
         }
     ];
 
     return (
         <div className="container">
-            <Aurora
-                colorStops={["#1F75FE", "#FFFFF3", "#1F75FE"]}
-                blend={0.5}
-                amplitude={1.0}
-                speed={0.5}
-            />
             <NavBar />
             <div className="new-releases-container">
                 {slides.map((slide, index) => (
@@ -202,15 +264,16 @@ function MainPage() {
                 <h2 className="section-title">New Releases</h2>
                 <div className="phone-cards-grid">
                     {phoneCards.map((phone, index) => (
-                        <div key={index} className="phone-card">
-                            <div className="phone-card-image">
-                                <img src={phone.image} alt={phone.name} />
-                            </div>
-                            <div className="phone-card-info">
-                                <h3>{phone.name}</h3>
-                                <p className="phone-price">${phone.price}</p>
-                            </div>
-                        </div>
+                        <CardComponent
+                            key={index}
+                            name={phone.name}
+                            company={phone.company}
+                            price={phone.price}
+                            description={phone.description}
+                            ram={phone.ram}
+                            storage={phone.storage}
+                            image={phone.image}
+                        />
                     ))}
                 </div>
             </div>
