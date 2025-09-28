@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cart Page Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            margin: 10px 5px 10px 0;
+            background-color: #4CAF50;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            cursor: pointer;
+            border: none;
+            font-size: 16px;
+        }
+        .button:hover {
+            background-color: #45a049;
+        }
+        .button-danger {
+            background-color: #f44336;
+        }
+        .button-danger:hover {
+            background-color: #d32f2f;
+        }
+        .button-info {
+            background-color: #2196F3;
+        }
+        .button-info:hover {
+            background-color: #0b7dda;
+        }
+        .output {
+            background-color: #f0f0f0;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 20px;
+            white-space: pre-wrap;
+            word-break: break-all;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .status {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .nav-links {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px solid #eee;
+        }
+        .nav-links a {
+            display: block;
+            margin: 10px 0;
+            color: #2196F3;
+            text-decoration: none;
+            font-size: 18px;
+        }
+        .nav-links a:hover {
+            text-decoration: underline;
+        }
+        .steps {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+        .steps ol {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Cart Page Test Tool</h1>
+        
+        <div class="steps">
+            <h3>How to use this tool:</h3>
+            <ol>
+                <li>First, make sure your development server is running (use <code>npm run dev</code> in the project directory)</li>
+                <li>Click one of the "Add Test Item" buttons below to populate your cart</li>
+                <li>Click the "View Cart Page" link to test if the cart is displaying correctly</li>
+                <li>Use the other buttons to clear the cart or view current cart data</li>
+            </ol>
+        </div>
+        
+        <div>
+            <button class="button" onclick="addTestItem1()">Add Test Item 1</button>
+            <button class="button" onclick="addTestItem2()">Add Test Item 2</button>
+            <button class="button button-info" onclick="viewCartData()">View Current Cart Data</button>
+            <button class="button button-danger" onclick="clearCart()">Clear Cart</button>
+        </div>
+        
+        <div class="status" id="status"></div>
+        
+        <div class="output" id="output">
+            Cart data will appear here when you click "View Current Cart Data"
+        </div>
+        
+        <div class="nav-links">
+            <h3>Navigation Links:</h3>
+            <a href="http://localhost:5173/cart" target="_blank">View Cart Page</a>
+            <a href="http://localhost:5173/main" target="_blank">View Main Page</a>
+            <a href="http://localhost:5173" target="_blank">View Home Page</a>
+        </div>
+    </div>
+
+    <script>
+        // Function to add test item 1 to cart
+        function addTestItem1() {
+            try {
+                const testItem = {
+                    id: 'test-product-1',
+                    name: 'Wireless Headphones',
+                    price: 129.99,
+                    image: 'https://via.placeholder.com/200x200?text=Headphones',
+                    quantity: 1,
+                    basePrice: 129.99
+                };
+                
+                // Get existing cart or create new
+                let cart = [];
+                const savedCart = localStorage.getItem('cart');
+                if (savedCart) {
+                    cart = JSON.parse(savedCart);
+                }
+                
+                // Add the new item
+                cart.push(testItem);
+                
+                // Save back to localStorage
+                localStorage.setItem('cart', JSON.stringify(cart));
+                
+                document.getElementById('status').textContent = 'Success: Wireless Headphones added to cart!';
+                document.getElementById('status').className = 'status success';
+                
+                console.log('Test item 1 added to cart:', testItem);
+            } catch (error) {
+                document.getElementById('status').textContent = 'Error: ' + error.message;
+                document.getElementById('status').className = 'status error';
+                console.error('Error adding test item 1:', error);
+            }
+        }
+        
+        // Function to add test item 2 to cart
+        function addTestItem2() {
+            try {
+                const testItem = {
+                    id: 'test-product-2',
+                    name: 'Smart Watch',
+                    price: 199.99,
+                    image: 'https://via.placeholder.com/200x200?text=Smart+Watch',
+                    quantity: 1,
+                    basePrice: 199.99
+                };
+                
+                // Get existing cart or create new
+                let cart = [];
+                const savedCart = localStorage.getItem('cart');
+                if (savedCart) {
+                    cart = JSON.parse(savedCart);
+                }
+                
+                // Add the new item
+                cart.push(testItem);
+                
+                // Save back to localStorage
+                localStorage.setItem('cart', JSON.stringify(cart));
+                
+                document.getElementById('status').textContent = 'Success: Smart Watch added to cart!';
+                document.getElementById('status').className = 'status success';
+                
+                console.log('Test item 2 added to cart:', testItem);
+            } catch (error) {
+                document.getElementById('status').textContent = 'Error: ' + error.message;
+                document.getElementById('status').className = 'status error';
+                console.error('Error adding test item 2:', error);
+            }
+        }
+        
+        // Function to view current cart data
+        function viewCartData() {
+            try {
+                const savedCart = localStorage.getItem('cart');
+                if (savedCart) {
+                    const parsedCart = JSON.parse(savedCart);
+                    document.getElementById('output').textContent = JSON.stringify(parsedCart, null, 2);
+                    document.getElementById('status').textContent = 'Success: Cart contains ' + parsedCart.length + ' items';
+                    document.getElementById('status').className = 'status success';
+                } else {
+                    document.getElementById('output').textContent = 'Cart is empty';
+                    document.getElementById('status').textContent = 'Info: Cart is currently empty';
+                    document.getElementById('status').className = 'status success';
+                }
+            } catch (error) {
+                document.getElementById('status').textContent = 'Error: ' + error.message;
+                document.getElementById('status').className = 'status error';
+                document.getElementById('output').textContent = 'Error parsing cart data: ' + error.message;
+                console.error('Error viewing cart data:', error);
+            }
+        }
+        
+        // Function to clear cart
+        function clearCart() {
+            try {
+                localStorage.removeItem('cart');
+                document.getElementById('status').textContent = 'Success: Cart cleared!';
+                document.getElementById('status').className = 'status success';
+                document.getElementById('output').textContent = 'Cart has been cleared';
+                console.log('Cart cleared');
+            } catch (error) {
+                document.getElementById('status').textContent = 'Error: ' + error.message;
+                document.getElementById('status').className = 'status error';
+                console.error('Error clearing cart:', error);
+            }
+        }
+        
+        // Show current cart status on page load
+        window.onload = function() {
+            try {
+                const savedCart = localStorage.getItem('cart');
+                if (savedCart) {
+                    const parsedCart = JSON.parse(savedCart);
+                    document.getElementById('status').textContent = 'Info: Cart currently contains ' + parsedCart.length + ' items';
+                    document.getElementById('status').className = 'status success';
+                } else {
+                    document.getElementById('status').textContent = 'Info: Cart is currently empty';
+                    document.getElementById('status').className = 'status success';
+                }
+            } catch (error) {
+                document.getElementById('status').textContent = 'Error loading cart status';
+                document.getElementById('status').className = 'status error';
+            }
+        };
+    </script>
+</body>
+</html>

@@ -17,26 +17,28 @@ body, html {
   background-color: transparent !important;
 }
 
-.login-page-container {
+.landing-page-container {
   position: relative;
   width: 100vw;
-  height: 100vh;
+  min-height: 100vh;
   overflow: hidden;
+  margin: 0;
+  padding: 1rem;
+  background-color: transparent;
+  margin-top: 2rem;
+  border-radius: 20px;
 }
 
 .container {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  width: 100vw;
   z-index: 10;
   display: flex;
   flex-direction: column;
-  align-items: center;
   justify-content: center;
   text-align: center;
-  padding: 20px;
+  padding: 0;
+  margin-bottom: 2rem;
+  padding-bottom: 2rem;
 }
 
 .title {
@@ -73,7 +75,7 @@ body, html {
   }
   
   .text-block {
-    font-size: clamp(12px, 5vw, 24px) !important;
+    font-size: clamp(12px, 5vw, 14px) !important;
   }
 }
 

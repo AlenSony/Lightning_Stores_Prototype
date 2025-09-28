@@ -1,40 +1,72 @@
-.container {
-    position: relative;
-    width: 100vw;
-    min-height: 100vh;
-    overflow-y: auto;
-    overflow-x: hidden;
-    background: linear-gradient(135deg, #6f6e6e 0%, #ffffff 100%);
+* {
+    padding: 0;
+    margin: 0 auto;
 }
 
-.new-releases-container {
-    position: relative;
-    width: 92%;
-    height: 55%;
+/* Navbar styling - fixed at top */
+.navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 95%;   /* was 0%, changed to full width */
+    z-index: 1000;
+    background-color: rgba(255, 255, 255, 0.132);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    padding: 1rem 2rem;
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    padding: 2rem;
-    z-index: 100;
-    border-radius: 20px;
-    border: 1px solid rgba(31, 117, 254, 0.3);
-    margin: 1rem auto;
-    margin-top: 2rem;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15), 0 0 20px rgba(31, 117, 254, 0.1);
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(10px);
-    overflow: hidden;
-    padding-bottom: -10px;
+    gap: 2rem;
+    margin-bottom: 1rem;
+    margin-left: 2rem;
+    margin-right: 2rem;
+    
 }
 
+/* Container for the entire page */
+.container {
+    position: static;
+    width: 100%;
+    height: fit-content;
+    overflow-x: hidden;
+    background: linear-gradient(135deg, #6f6e6e 0%, #ffffff 100%);
+    scroll-snap-type: y mandatory;
+    scroll-behavior: smooth;
+}
+
+/* Landing page container - should take full screen height */
+.landing-page-container {
+    width: 100vw;
+    height: 100vh;  /* ensures it fills the screen */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6rem 2rem 2rem; /* top padding so content isn’t hidden under navbar */
+    margin-bottom: 1rem;
+    border-radius: 20px;
+}
+
+/* Section below landing page (example: New Releases) */
+.container .new-releases-section {
+    width: 92%;
+    min-height: 100vh;
+    margin: 2rem auto;
+    padding: 3rem 2rem;
+    border-radius: 20px;
+    border: 1px solid rgba(31, 117, 254, 0.3);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15),
+                0 0 20px rgba(31, 117, 254, 0.1);
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+}
 
 .image-container {
     flex: 1;
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 300px;
-    height: 300px;
+    min-width: 300px;
+    min-height: 300px;
     padding: 15px;
 }
 
@@ -92,7 +124,7 @@
     padding-right: 30px;
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: left;
 }
 
 .content-title {
@@ -101,22 +133,94 @@
     margin-bottom: 20px;
 }
 
-/* Phone Cards Styling */
+/* Section Title Styling */
+.section-title {
+    text-align: left;
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #1a237e;
+    margin-bottom: 2rem;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* New Release Content Styling */
+.content {
+    font-size: 0.8rem;
+    line-height: 1.8;
+    color: #333;
+}
+
+.content ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+.content li {
+    position: relative;
+    padding-left: 1.8rem;
+    margin-bottom: 0.8rem;
+    color: #333;
+    font-size: 1.1rem;
+}
+
+.content li:before {
+    content: "•";
+    color: #1f75fe;
+    font-weight: bold;
+    position: absolute;
+    left: 0;
+    font-size: 1.5rem;
+    line-height: 1;
+}
+
+/* Ensure new release section text is readable */
+.content-title h2 {
+    font-size: 2rem;
+    color: #1a237e;
+    margin: 0 0 1.5rem 0;
+    text-align: left;
+}
+
+.text-content-side {
+    flex: 1;
+    padding-right: 30px;
+    display: flex;
+    flex-direction: column;
+    justify-content: left;
+    min-width: 0;
+}
+
+/* Phone Cards Styling - Ensure proper containment */
 .phone-cards-container {
-    margin: 2rem auto;
-    padding: 2rem;
+    margin: 4rem auto;
+    padding: 3rem 2rem;
     max-width: 1400px;
-    width: 100%;
+    width: 92%;
     border-radius: 24px;
     border: 1px solid rgba(31, 117, 254, 0.3);
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15), 0 0 20px rgba(31, 117, 254, 0.1);
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(10px);
-    overflow: hidden;
+    overflow: visible;
+    z-index: 1;
 }
 
-/* Card hover effects */
-.component_contrainer {
+/* Phone Cards Grid - Ensure proper layout within container */
+.phone-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2.5rem;
+    justify-content: center;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    position: relative;
+    z-index: 2;
+}
+
+/* Card styling - this matches the class used in ComponentCard.jsx */
+.phone-cards-container .phone-cards-grid .component_contrainer {
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     background: linear-gradient(145deg, #ffffff, #f0f0f0);
     border-radius: 16px;
@@ -133,22 +237,36 @@
     backdrop-filter: blur(5px);
 }
 
+/* Card hover effects */
+.phone-cards-container .phone-cards-grid .component_contrainer:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 
+        0 15px 30px rgba(0, 0, 0, 0.18),
+        0 5px 15px rgba(0, 0, 0, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    background: linear-gradient(145deg, #ffffff, #f5f5f5);
+}
+
 /* Subtle decorative element */
-.component_contrainer::before {
+.phone-cards-container .phone-cards-grid .component_contrainer::before {
     content: '';
     position: absolute;
     top: -50%;
     left: -50%;
     width: 200%;
     height: 200%;
-    background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 70%);
+    background: radial-gradient(circle, rgba(31, 117, 254, 0.1) 0%, rgba(255, 255, 255, 0) 70%);
     opacity: 0;
     transition: opacity 0.5s ease;
     pointer-events: none;
 }
 
+.phone-cards-container .phone-cards-grid .component_contrainer:hover::before {
+    opacity: 1;
+}
+
 /* Card image styling with fixed size */
-.component_contrainer img {
+.phone-cards-container .phone-cards-grid .component_contrainer img {
     width: 100%;
     height: 200px;
     object-fit: contain;
@@ -161,30 +279,17 @@
     transition: transform 0.5s ease, box-shadow 0.3s ease;
 }
 
-.component_contrainer:hover {
-    transform: translateY(-8px) scale(1.02);
-    box-shadow: 
-        0 15px 30px rgba(0, 0, 0, 0.18),
-        0 5px 15px rgba(0, 0, 0, 0.1),
-        inset 0 1px 0 rgba(255, 255, 255, 0.9);
-    background: linear-gradient(145deg, #ffffff, #f5f5f5);
-}
-
-.component_contrainer:hover::before {
-    opacity: 1;
-}
-
-.component_contrainer:hover .component_header h2 {
+.phone-cards-container .phone-cards-grid .component_contrainer:hover .component_header h2 {
     color: #1a237e;
 }
 
-.component_contrainer:hover img {
+.phone-cards-container .phone-cards-grid .component_contrainer:hover img {
     transform: scale(1.08) rotate(2deg);
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
 }
 
 /* Description visibility toggle */
-.component_description {
+.phone-cards-container .phone-cards-grid .component_contrainer .component_description {
     max-height: 0;
     opacity: 0;
     overflow: hidden;
@@ -195,14 +300,14 @@
     margin-bottom: 1rem;
 }
 
-.component_contrainer:hover .component_description {
+.phone-cards-container .phone-cards-grid .component_contrainer:hover .component_description {
     max-height: 100px;
     opacity: 1;
     margin-top: 10px;
 }
 
 /* Ensure RAM and storage are displayed in small font by default */
-.component_specs {
+.phone-cards-container .phone-cards-grid .component_contrainer .component_specs {
     font-size: 0.85rem;
     color: #666;
     margin-top: 5px;
@@ -211,12 +316,12 @@
 
 
 /* Header styling */
-.component_header {
+.phone-cards-container .phone-cards-grid .component_contrainer .component_header {
     text-align: center;
     margin-bottom: 1rem;
 }
 
-.component_header h2 {
+.phone-cards-container .phone-cards-grid .component_contrainer .component_header h2 {
     font-size: 1.2rem;
     font-weight: 700;
     color: #222;
@@ -225,7 +330,7 @@
     transition: color 0.3s ease;
 }
 
-.component_header p {
+.phone-cards-container .phone-cards-grid .component_contrainer .component_header p {
     font-size: 0.9rem;
     color: #666;
     margin: 0;
@@ -233,12 +338,12 @@
 }
 
 /* Price styling */
-.component_price {
+.phone-cards-container .phone-cards-grid .component_contrainer .component_price {
     text-align: center;
     margin-bottom: 1rem;
 }
 
-.component_price p {
+.phone-cards-container .phone-cards-grid .component_contrainer .component_price p {
     font-size: 1.3rem;
     font-weight: 800;
     color: #2c3e50;
@@ -251,7 +356,7 @@
 }
 
 /* Specs styling */
-.component_specs {
+.phone-cards-container .phone-cards-grid .component_contrainer .component_specs {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -262,7 +367,7 @@
     border: 1px solid #e0e0e0;
 }
 
-.component_specs p {
+.phone-cards-container .phone-cards-grid .component_contrainer .component_specs p {
     font-size: 0.85rem;
     font-weight: 600;
     color: #444;
@@ -270,7 +375,7 @@
 }
 
 /* Button styling */
-.component_buttons {
+.phone-cards-container .phone-cards-grid .component_contrainer .component_buttons {
     display: flex;
     justify-content: center;
     gap: 1rem;
@@ -278,16 +383,16 @@
     width: 100%;
 }
 
-.component_add-to-cart-button,
-.component_buy-button {
+.phone-cards-container .phone-cards-grid .component_contrainer .component_add-to-cart-button,
+.phone-cards-container .phone-cards-grid .component_contrainer .component_buy-button {
     flex: 1;
     display: flex;
     justify-content: center;
     margin-top: 1rem;
 }
 
-.component_add-to-cart-button button,
-.component_buy-button button {
+.phone-cards-container .phone-cards-grid .component_contrainer .component_add-to-cart-button button,
+.phone-cards-container .phone-cards-grid .component_contrainer .component_buy-button button {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -301,7 +406,7 @@
     transition: background-color 0.3s ease;
 }
 
-.component_add-to-cart-button button{
+.phone-cards-container .phone-cards-grid .component_contrainer .component_add-to-cart-button button{
     background: linear-gradient(145deg, #696b6d, #5a5c5e);
     color: #fff;
     font-weight: 600;
@@ -319,7 +424,7 @@
     overflow: hidden;
 }
 
-.component_buy-button button{
+.phone-cards-container .phone-cards-grid .component_contrainer .component_buy-button button{
     background: linear-gradient(145deg, #474a4a, #3a3c3c);
     color: #fff;
     font-weight: 600;
@@ -338,8 +443,8 @@
 }
 
 /* Button shine effect */
-.component_add-to-cart-button button::before,
-.component_buy-button button::before {
+.phone-cards-container .phone-cards-grid .component_contrainer .component_add-to-cart-button button::before,
+.phone-cards-container .phone-cards-grid .component_contrainer .component_buy-button button::before {
     content: '';
     position: absolute;
     top: -50%;
@@ -366,13 +471,13 @@
     }
 }
 
-.component_add-to-cart-button button:hover {
+.phone-cards-container .phone-cards-grid .component_contrainer .component_add-to-cart-button button:hover {
     background: linear-gradient(145deg, #5a5c5e, #4d4e50);
     transform: translateY(-2px);
     box-shadow: 0 6px 15px rgba(105, 107, 109, 0.3);
 }
 
-.component_buy-button button:hover {
+.phone-cards-container .phone-cards-grid .component_contrainer .component_buy-button button:hover {
     background: linear-gradient(145deg, #3a3c3c, #2e3030);
     transform: translateY(-2px);
     box-shadow: 0 6px 15px rgba(71, 74, 74, 0.3);
@@ -390,12 +495,43 @@
         gap: 1.5rem;
     }
     
-    .component_contrainer {
+    .phone-cards-container .phone-cards-grid .component_contrainer {
         padding: 1.2rem;
     }
     
-    .component_contrainer img {
+    .phone-cards-container .phone-cards-grid .component_contrainer img {
         height: 180px;
+    }
+    
+    /* Responsive styles for new release section */
+    #new-releases-section {
+        width: 95%;
+        padding: 2rem 1rem;
+        margin: 1rem auto;
+    }
+    
+    .slide-content-wrapper {
+        flex-direction: column;
+    }
+    
+    .text-content-side {
+        padding-right: 0;
+        padding-bottom: 20px;
+        order: 2;
+    }
+    
+    .image-container {
+        order: 1;
+        min-width: 250px;
+        min-height: 250px;
+    }
+    
+    .content-title h2 {
+        font-size: 1.5rem;
+    }
+    
+    .content-container .content {
+        font-size: 1rem;
     }
 }
 
@@ -405,35 +541,35 @@
 
 .section-title {
     text-align: center;
-    margin-bottom: 1.5rem;
-    color: #fff;
-    font-size: 1.8rem;
-    text-shadow: 0 0 10px rgba(31, 117, 254, 0.5);
+    margin-bottom: 2.5rem;
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: #1a237e;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    background: linear-gradient(135deg, #1F75FE, #00BFFF, #87CEFA);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    padding: 5px 15px;
 }
 
 .phone-cards-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 2rem;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2.5rem;
     justify-content: center;
-    padding: 1rem;
+    padding: 0;
     width: 100%;
-    margin: 0 auto;
+    margin: 0;
+    min-height: 300px;
+    position: relative;
+    z-index: 2;
+    overflow: visible;
 }
 
-.phone-card {
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 12px;
-    overflow: hidden;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-}
 
-.phone-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 25px rgba(31, 117, 254, 0.2);
-}
+
+
 
 .phone-card-image {
     height: 180px;
@@ -487,25 +623,27 @@
     border-bottom: 2px solid rgba(31, 117, 254, 0.3);
 }
 
-.content-container .content{
-    color: white;
-    font-size: 0.8rem;
-    letter-spacing: 0.1rem;
+/* Main content styles */
+.content-container .content {
+    color: #333;
+    font-size: 1.1rem;
+    letter-spacing: normal;
     margin-bottom: 1rem;
     font-family: 'Roboto', sans-serif;
     font-weight: 400;
-    line-height: 1.5;
+    line-height: 1.8;
 }
 
 .content-container .content ul {
     list-style-type: none;
-    padding-left: 5px;
+    padding-left: 0;
+    margin: 0;
 }
 
-.content-container .content li{
+.content-container .content li {
     margin-bottom: 0.8rem;
     position: relative;
-    padding-left: 20px;
+    padding-left: 1.8rem;
 }
 
 .content-container .content li:before {
@@ -514,12 +652,13 @@
     font-weight: bold;
     position: absolute;
     left: 0;
-    font-size: 1.2rem;
+    font-size: 1.5rem;
+    line-height: 1;
 }
 
 .slideshow-controls {
-    position: absolute;
-    bottom: 20px;
+    position: relative;
+    margin-top: 2rem;
     width: 100%;
     display: flex;
     justify-content: center;

@@ -126,10 +126,10 @@ export default function Aurora(props) {
       antialias: true
     });
     const gl = renderer.gl;
-    gl.clearColor(0, 0, 0, 0);
+    gl.clearColor(1,1,1,1);
     gl.enable(gl.BLEND);
     gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
-    gl.canvas.style.backgroundColor = 'transparent';
+    gl.canvas.style.backgroundColor = 'white';
 
     let program;
 

@@ -9,21 +9,32 @@ function createDeviceSchema() {
       type: String,
       required: true,
     },
-    company_id: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Company",
+    company: {
+      type: String,
       required: true,
     },
     description: {
       type: String,
       required: true,
     },
-    price: {
+    ram: {
+      type: String,
+      required: true,
+    },
+    storage: {
+      type: String,
+      required: true,
+    },
+    expected_price: {
       type: Number,
       required: true,
     },
+    actual_price: {
+      type: String,
+      required: true,
+    },
     stock: {
-      type: Number,
+      type: String,
       required: true,
     },
     category: {
@@ -32,9 +43,11 @@ function createDeviceSchema() {
     },
     image_url: {
       type: String,
+      required: true,
     },
   });
 }
+
 const Device = mongoose.model("Device", createDeviceSchema());
 
 export default Device;

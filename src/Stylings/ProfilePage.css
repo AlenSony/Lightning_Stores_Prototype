@@ -1,0 +1,411 @@
+/* Profile Page Styles */
+.profile-page-container {
+    width: 100%;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #6f6e6e 0%, #ffffff 100%);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Background decorative elements */
+.profile-page-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at 10% 20%, rgba(31, 117, 254, 0.05) 0%, rgba(0, 191, 255, 0.05) 90%);
+    z-index: 0;
+}
+
+.profile-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+    margin-top: 5.5rem;
+    position: relative;
+    z-index: 1;
+}
+
+.profile-header {
+    text-align: center;
+    margin-bottom: 3rem;
+    padding: 2rem;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.profile-header h1 {
+    font-size: 2.8rem;
+    margin-bottom: 0.5rem;
+    background: linear-gradient(135deg, #1F75FE, #00BFFF, #87CEFA);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.profile-role {
+    font-size: 1.1rem;
+    color: #666;
+    font-weight: 500;
+}
+
+.profile-error {
+    background-color: #fee;
+    color: #c00;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+.profile-loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    font-size: 1.2rem;
+    color: #666;
+}
+
+/* Section Styles */
+.personal-info-section,
+.device-management-section,
+.admin-management-section {
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(15px);
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    padding: 2.5rem;
+    margin-bottom: 2.5rem;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.personal-info-section:hover,
+.device-management-section:hover,
+.admin-management-section:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+}
+
+.personal-info-section h2,
+.device-management-section h2,
+.admin-management-section h2 {
+    font-size: 2rem;
+    margin-bottom: 1.8rem;
+    padding-bottom: 0.8rem;
+    background: linear-gradient(135deg, #1F75FE, #00BFFF, #87CEFA);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    position: relative;
+}
+
+.personal-info-section h2::after,
+.device-management-section h2::after,
+.admin-management-section h2::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 80px;
+    height: 4px;
+    background: linear-gradient(90deg, #1F75FE, #00BFFF);
+    border-radius: 2px;
+}
+
+/* Form Styles */
+.user-info-form,
+.device-form,
+.admin-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.form-group label {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #555;
+}
+
+.form-group input,
+.form-group textarea {
+    padding: 1rem 1.2rem;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 12px;
+    font-size: 1rem;
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(5px);
+    transition: all 0.3s ease;
+    box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #1F75FE;
+    box-shadow: 0 0 0 3px rgba(31, 117, 254, 0.2), inset 0 2px 5px rgba(0, 0, 0, 0.05);
+    transform: translateY(-1px);
+}
+
+.form-group input:disabled {
+    background-color: #f5f5f5;
+    cursor: not-allowed;
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+/* Address Input with Location Button */
+.address-input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+}
+
+.location-button {
+    padding: 1rem 1.2rem;
+    background: linear-gradient(135deg, #1F75FE, #00BFFF);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(31, 117, 254, 0.3);
+}
+
+.location-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: all 0.6s ease;
+}
+
+.location-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(31, 117, 254, 0.4);
+}
+
+.location-button:hover::before {
+    left: 100%;
+}
+
+/* Form Row for Side-by-Side Inputs */
+.form-row {
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.form-row .form-group {
+    flex: 1;
+    min-width: 200px;
+}
+
+/* Button Styles */
+.update-button,
+.add-device-button,
+.add-admin-button {
+    padding: 1.2rem 2.5rem;
+    background: linear-gradient(135deg, #1F75FE, #00BFFF);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    align-self: flex-start;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(31, 117, 254, 0.3);
+}
+
+.update-button::before,
+.add-device-button::before,
+.add-admin-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: all 0.6s ease;
+}
+
+.update-button:hover,
+.add-device-button:hover,
+.add-admin-button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(31, 117, 254, 0.4);
+}
+
+.update-button:hover::before,
+.add-device-button:hover::before,
+.add-admin-button:hover::before {
+    left: 100%;
+}
+
+/* Logout Section */
+.logout-section {
+    text-align: center;
+    margin-top: 3rem;
+    margin-bottom: 2rem;
+}
+
+.logout-button {
+    padding: 1.2rem 3.5rem;
+    background: linear-gradient(135deg, #e63946, #ff6b6b);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(230, 57, 70, 0.3);
+}
+
+.logout-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: all 0.6s ease;
+}
+
+.logout-button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(230, 57, 70, 0.4);
+}
+
+.logout-button:hover::before {
+    left: 100%;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .profile-content {
+        padding: 1rem;
+        margin-top: 4.5rem;
+    }
+
+    .profile-header {
+        padding: 1.5rem;
+    }
+
+    .profile-header h1 {
+        font-size: 2.2rem;
+    }
+
+    .personal-info-section,
+    .device-management-section,
+    .admin-management-section {
+        padding: 1.8rem 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .personal-info-section h2,
+    .device-management-section h2,
+    .admin-management-section h2 {
+        font-size: 1.8rem;
+    }
+
+    .personal-info-section h2::after,
+    .device-management-section h2::after,
+    .admin-management-section h2::after {
+        width: 60px;
+        height: 3px;
+    }
+
+    .form-group input,
+    .form-group textarea {
+        padding: 0.9rem 1rem;
+    }
+
+    .form-row {
+        flex-direction: column;
+        gap: 1.2rem;
+    }
+
+    .form-row .form-group {
+        min-width: 100%;
+    }
+
+    .location-button {
+        padding: 0.9rem 1rem;
+    }
+
+    .update-button,
+    .add-device-button,
+    .add-admin-button {
+        padding: 1.1rem 2rem;
+        align-self: stretch;
+    }
+
+    .logout-button {
+        padding: 1.1rem 3rem;
+        width: 100%;
+        align-self: stretch;
+    }
+}
+
+/* Add some subtle animations for enhanced user experience */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.personal-info-section,
+.device-management-section,
+.admin-management-section {
+    animation: fadeIn 0.6s ease forwards;
+}
+
+.personal-info-section {
+    animation-delay: 0.1s;
+}
+
+.device-management-section {
+    animation-delay: 0.3s;
+}
+
+.admin-management-section {
+    animation-delay: 0.5s;
+}

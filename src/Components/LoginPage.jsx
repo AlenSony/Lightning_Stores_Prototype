@@ -1,7 +1,9 @@
 import { useState } from 'react';
-import LightRays from '../assets/LightRays';
+import { useNavigate } from 'react-router-dom';
+import Aurora from '../assets/Aurora.jsx';
 
 function LoginPage() {
+  const navigate = useNavigate();
   const [isLogin, setIsLogin] = useState(true);
   const [formData, setFormData] = useState({
     email: '',
@@ -52,7 +54,9 @@ function LoginPage() {
     }
 
     setError('');
-    alert(`${isLogin ? 'Login' : 'Signup'} successful! (Demo)`);
+    // 在实际应用中，这里会有API调用来验证用户凭据
+    console.log(`${isLogin ? 'Login' : 'Signup'} successful! (Demo)`);
+    navigate('/main');
   };
 
   return (
@@ -63,18 +67,12 @@ function LoginPage() {
       position: 'relative',
       overflow: 'hidden'
     }}>
-      <LightRays
-        raysOrigin="top-center"
-        raysColor="#1F75FE"
-        raysSpeed={1.5}
-        lightSpread={0.8}
-        rayLength={1.2}
-        followMouse={true}
-        mouseInfluence={0.1}
-        noiseAmount={0.1}
-        distortion={0.05}
-        className="custom-rays"
+      <Aurora 
+        colorStops={['#5227FF', '#00C6FF', '#7cff67']} 
+        amplitude={1.2} 
+        blend={0.6}
       />
+      
       
       <div style={{
         position: 'absolute',
@@ -89,7 +87,7 @@ function LoginPage() {
         padding: '20px'
       }}>
         <div style={{
-          background: 'rgba(255, 255, 255, 0.1)',
+          background: 'rgba(255, 255, 255, 0.5)',
           backdropFilter: 'blur(15px)',
           borderRadius: '20px',
           padding: '40px',
@@ -102,7 +100,7 @@ function LoginPage() {
           {/* Header */}
           <div style={{ marginBottom: '30px' }}>
             <h1 style={{ 
-              color: 'white', 
+              color: 'rgba(32, 32, 32, 1)', 
               fontSize: '32px', 
               marginBottom: '10px',
               fontWeight: 'bold'
@@ -110,7 +108,7 @@ function LoginPage() {
               Lightning Stores
             </h1>
             <p style={{ 
-              color: 'rgba(255, 255, 255, 0.7)', 
+              color: 'rgba(32, 32, 32, 0.7)', 
               fontSize: '16px',
               margin: 0
             }}>
@@ -134,7 +132,7 @@ function LoginPage() {
                 borderRadius: '8px',
                 border: 'none',
                 background: isLogin ? 'rgba(255, 255, 255, 0.2)' : 'transparent',
-                color: 'white',
+                color: 'rgba(32, 32, 32, 1)',
                 fontSize: '16px',
                 cursor: 'pointer',
                 transition: 'all 0.3s'
@@ -150,7 +148,7 @@ function LoginPage() {
                 borderRadius: '8px',
                 border: 'none',
                 background: !isLogin ? 'rgba(255, 255, 255, 0.2)' : 'transparent',
-                color: 'white',
+                color: 'rgba(32, 32, 32, 1)',
                 fontSize: '16px',
                 cursor: 'pointer',
                 transition: 'all 0.3s'
@@ -173,9 +171,9 @@ function LoginPage() {
                   width: '100%',
                   padding: '15px',
                   borderRadius: '10px',
-                  border: '1px solid rgba(255, 255, 255, 0.3)',
+                  border: '1px solid rgb(0, 0, 0)',
                   background: 'rgba(255, 255, 255, 0.1)',
-                  color: 'white',
+                  color: 'rgba(32, 32, 32, 1)',
                   fontSize: '16px',
                   marginBottom: '15px',
                   outline: 'none',
@@ -194,9 +192,9 @@ function LoginPage() {
                 width: '100%',
                 padding: '15px',
                 borderRadius: '10px',
-                border: '1px solid rgba(255, 255, 255, 0.3)',
+                border: '1px solid rgb(0, 0, 0)',
                 background: 'rgba(255, 255, 255, 0.1)',
-                color: 'white',
+                color: 'rgba(32, 32, 32, 1)',
                 fontSize: '16px',
                 marginBottom: '15px',
                 outline: 'none',
@@ -214,9 +212,9 @@ function LoginPage() {
                 width: '100%',
                 padding: '15px',
                 borderRadius: '10px',
-                border: '1px solid rgba(255, 255, 255, 0.3)',
+                border: '1px solid rgb(0, 0, 0)',
                 background: 'rgba(255, 255, 255, 0.1)',
-                color: 'white',
+                color: 'rgba(32, 32, 32, 1)',
                 fontSize: '16px',
                 marginBottom: !isLogin ? '15px' : '20px',
                 outline: 'none',
@@ -235,9 +233,9 @@ function LoginPage() {
                   width: '100%',
                   padding: '15px',
                   borderRadius: '10px',
-                  border: '1px solid rgba(255, 255, 255, 0.3)',
+                  border: '1px solid rgb(0, 0, 0)',
                   background: 'rgba(255, 255, 255, 0.1)',
-                  color: 'white',
+                  color: 'rgba(32, 32, 32, 1)',
                   fontSize: '16px',
                   marginBottom: '20px',
                   outline: 'none',
@@ -264,8 +262,8 @@ function LoginPage() {
                 padding: '15px',
                 borderRadius: '10px',
                 background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.1))',
-                color: 'white',
-                border: '1px solid rgba(255, 255, 255, 0.3)',
+                color: 'rgba(32, 32, 32, 1)',
+                border: '1px solid rgba(0, 0, 0, 0.56)',
                 fontSize: '16px',
                 fontWeight: '600',
                 cursor: 'pointer',
