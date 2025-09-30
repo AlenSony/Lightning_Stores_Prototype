@@ -1,7 +1,4 @@
 import mongoose from "mongoose";
-import connectDB from "../database/db.js";
-
-connectDB();
 
 function createDeviceSchema() {
   return new mongoose.Schema({
@@ -48,6 +45,7 @@ function createDeviceSchema() {
   });
 }
 
-const Device = mongoose.model("Device", createDeviceSchema());
+const Device =
+  mongoose.models.Device || mongoose.model("Device", createDeviceSchema());
 
 export default Device;

@@ -25,7 +25,7 @@ function LoginPage() {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
     if (!formData.email || !formData.password) {
@@ -54,10 +54,43 @@ function LoginPage() {
     }
 
     setError('');
-    // 在实际应用中，这里会有API调用来验证用户凭据
-    console.log(`${isLogin ? 'Login' : 'Signup'} successful! (Demo)`);
-    navigate('/main');
+
+    try{
+      const endpoint = isLogin ? "/api/login" : "/api/signup";
+      const body = isLogin 
+      ? { email: formData.email, password: formData.password }
+      : { email: formData.email, password: formData.password, name: formData.name };
+      
+      console.log('Making request to:', `http://localhost:5000${endpoint}`);
+      console.log('Request body:', body);
+      
+      const response = await fetch(`http://localhost:5000${endpoint}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include',
+        body: JSON.stringify(body)
+      });
+      
+      console.log('Response status:', response.status);
+      console.log('Response ok:', response.ok);
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.log(errorData);
+        throw new Error(errorData.message);
+      }
+
+      console.log(`${isLogin ? 'Login' : 'Signup'} successful!`);
+      localStorage.setItem('token', response.token);
+      navigate('/main');
+    }
+    catch(error){
+      console.error('Error:', error);
+      setError(error.message || 'An error occurred. Please try again.');
+    }
   };
+  
 
   return (
     <div style={{ 

@@ -1,9 +1,13 @@
 
 import { useNavigate } from 'react-router-dom';
+import { useToast } from '../assets/Toast.jsx';
 import { addToCart } from '../utils/cartUtils.js';
+import { useState } from 'react';
 
-function CardComponent ({name, company, price, description, ram, storage, image}) {
+function CardComponent ({_id, name, company, price, description, ram, storage, image}) {
     const navigate = useNavigate();
+    const { showToast } = useToast();
+    const [isAddingToCart, setIsAddingToCart] = useState(false);
     
     const handleCardClick = () => {
         // Navigate to item page with phone details as params
@@ -20,31 +24,25 @@ function CardComponent ({name, company, price, description, ram, storage, image}
         });
     };
     
-    const handleAddToCart = (e) => {
+    const handleAddToCart = async (e) => {
         e.stopPropagation(); // Prevent triggering card click
         
-        // Prepare item data
-        const itemData = {
-            name,
-            company,
-            price,
-            description,
-            ram,
-            storage,
-            image
-        };
+        if (isAddingToCart) return;
         
-        // Use the utility function to add to cart
-        const result = addToCart(itemData);
+        setIsAddingToCart(true);
         
-        // Show appropriate message based on result
-        alert(result.message);
-    };
-    
-    const handleBuyNow = (e) => {
-        e.stopPropagation(); // Prevent triggering card click
-        navigate('/item', {
-            state: {
+        try {
+            // Check if user is logged in
+            const token = localStorage.getItem('token');
+            if (!token) {
+                showToast('Please log in to add items to cart', 'error');
+                navigate('/login');
+                return;
+            }
+            
+            // Prepare item data
+            const itemData = {
+                _id, // Use the _id parameter directly
                 name,
                 company,
                 price,
@@ -52,8 +50,39 @@ function CardComponent ({name, company, price, description, ram, storage, image}
                 ram,
                 storage,
                 image
-            }
-        });
+            };
+            
+            // Use the utility function to add to cart (now handles backend integration)
+            const result = await addToCart(itemData);
+            showToast(result.message, result.success ? 'success' : 'error');
+        } catch (error) {
+            console.error('Error adding to cart:', error);
+            showToast('Failed to add item to cart. Please try again.', 'error');
+        } finally {
+            setIsAddingToCart(false);
+        }
+    };
+    
+    const handleBuyNow = async (e) => {
+        e.stopPropagation(); // Prevent triggering card click
+        
+        // Check if user is logged in
+        const token = localStorage.getItem('token');
+        if (!token) {
+            showToast('Please log in to continue', 'error');
+            navigate('/login');
+            return;
+        }
+        
+        try {
+            // First add to cart
+            await handleAddToCart(e);
+            // Then navigate to cart/checkout
+            navigate('/cart');
+        } catch (error) {
+            console.error('Error processing purchase:', error);
+            showToast('Failed to process purchase. Please try again.', 'error');
+        }
     };
     
     return (
@@ -76,7 +105,13 @@ function CardComponent ({name, company, price, description, ram, storage, image}
                 </div>
                 <div className="component_buttons">
                     <div className="component_add-to-cart-button">
-                        <button onClick={handleAddToCart}>Add to Cart</button>
+                        <button 
+                            onClick={handleAddToCart} 
+                            data-product-id={_id} 
+                            disabled={isAddingToCart}
+                        >
+                            {isAddingToCart ? 'Adding...' : 'Add to Cart'}
+                        </button>
                     </div>
                     <div className="component_buy-button">
                         <button onClick={handleBuyNow}>Buy Now</button>

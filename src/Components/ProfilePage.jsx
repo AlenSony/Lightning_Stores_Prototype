@@ -1,10 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import NavBar from '../assets/navbar.jsx';
+import { useToast } from '../assets/Toast.jsx';
 import '../Stylings/ProfilePage.css';
 
 function ProfilePage() {
   const navigate = useNavigate();
+  const { showToast } = useToast();
   const [userRole, setUserRole] = useState('user'); // Default to user
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
@@ -33,28 +35,36 @@ function ProfilePage() {
     email: ''
   });
 
-  // Simulate fetching user data (would be replaced with actual API call)
+  // Fetch actual user data from API
   useEffect(() => {
     const fetchUserData = async () => {
       try {
         setIsLoading(true);
-        // In a real app, this would be an API call to fetch user data
-        // For now, we'll simulate an authenticated user with admin role for demo
-        // You should replace this with actual authentication check
-        const currentUser = {
-          role: 'admin', // This would come from auth state
-          name: 'Admin User',
-          email: 'admin@example.com',
-          address: '123 Admin Street',
-          phone: '123-456-7890'
-        };
+        // Make API call to fetch current user data
+        const response = await fetch('http://localhost:5000/api/user', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          credentials: 'include'
+        });
         
-        setUserRole(currentUser.role);
+        if (!response.ok) {
+          if (response.status === 401) {
+            // Not authenticated, redirect to login
+            navigate('/login');
+            return;
+          }
+          throw new Error('Failed to fetch user data');
+        }
+        
+        const data = await response.json();
+        setUserRole(data.role || 'user');
         setUserInfo({
-          name: currentUser.name,
-          email: currentUser.email,
-          address: currentUser.address || '',
-          phone: currentUser.phone || ''
+          name: data.name || '',
+          email: data.email || '',
+          address: data.address || '',
+          phone: data.phone || ''
         });
         
         setError('');
@@ -67,32 +77,35 @@ function ProfilePage() {
     };
 
     fetchUserData();
-  }, []);
+    }, [navigate]);
 
   // Handle personal info form changes
   const handleUserInfoChange = (e) => {
     const { name, value } = e.target;
+    const cleanedValue = value.trim();
     setUserInfo(prev => ({
       ...prev,
-      [name]: value
+      [name]: cleanedValue
     }));
   };
 
   // Handle device form changes
   const handleDeviceFormChange = (e) => {
     const { name, value } = e.target;
+    const cleanedValue = value.trim();
     setDeviceForm(prev => ({
       ...prev,
-      [name]: value
+      [name]: cleanedValue
     }));
   };
 
   // Handle admin form changes
   const handleAdminFormChange = (e) => {
     const { name, value } = e.target;
+    const cleanedValue = value.trim();
     setAdminForm(prev => ({
       ...prev,
-      [name]: value
+      [name]: cleanedValue
     }));
   };
 
@@ -100,12 +113,66 @@ function ProfilePage() {
   const handleUpdateUserInfo = async (e) => {
     e.preventDefault();
     try {
-      // In a real app, this would be an API call to update user info
-      console.log('Updating user info:', userInfo);
-      alert('Profile updated successfully!');
+      // Check if token cookie is available
+      const token = document.cookie.split('; ').find(row => row.startsWith('token='))?.split('=')[1];
+      console.log('Token available:', !!token);
+      console.log('Token length:', token ? token.length : 0);
+      
+      // Create a clean object with only allowed fields to prevent issues
+      const profileData = {
+        name: userInfo.name || '',
+        email: userInfo.email || '',
+        address: userInfo.address || '',
+        phone: userInfo.phone || ''
+      };
+      
+      console.log('Sending profile update with filtered data:', profileData);
+      
+      // Stringify the data explicitly to ensure proper JSON formatting
+      let requestBody;
+      try {
+        requestBody = JSON.stringify(profileData);
+        console.log('Request body JSON:', requestBody);
+      } catch (jsonError) {
+        console.error('Error stringifying data:', jsonError);
+        throw new Error('Failed to prepare data for update');
+      }
+      
+      const response = await fetch('http://localhost:5000/api/user/profile', {
+        method: 'PATCH',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: requestBody
+      });
+      
+      console.log('Response status:', response.status);
+      console.log('Response headers:', Object.fromEntries(response.headers.entries()));
+      
+      if (!response.ok) {
+        // Try to get error details from server
+        const errorText = await response.text();
+        console.log('Raw error response:', errorText);
+        let errorData = {};
+        try {
+          errorData = JSON.parse(errorText);
+        } catch (jsonError) {
+          console.log('Error parsing JSON response:', jsonError);
+        }
+        throw new Error(errorData.message || errorData.error || errorText.substring(0, 100) || 'Failed to update profile');
+      }
+      
+      // Verify we can parse the success response
+      const data = await response.json();
+      console.log('Update successful data:', data);
+      showToast('Profile updated successfully!', 'success');
+      
+      // Refresh the user data to show the updated information
+      //fetchUserData();
     } catch (err) {
-      setError('Failed to update profile. Please try again.');
-      console.error('Error updating user info:', err);
+      setError("");
     }
   };
 
@@ -113,8 +180,37 @@ function ProfilePage() {
   const handleAddDevice = async (e) => {
     e.preventDefault();
     try {
-      // In a real app, this would be an API call to add a device
-      console.log('Adding device:', deviceForm);
+      // Convert form data to match the server's expected format
+      const deviceData = {
+        name: deviceForm.name,
+        company: deviceForm.company,
+        description: deviceForm.description,
+        ram: deviceForm.ram,
+        storage: deviceForm.storage,
+        expected_price: parseFloat(deviceForm.price),
+        actual_price: parseFloat(deviceForm.price),
+        stock: 100, // Default stock value
+        category: 'smartphone', // Default category
+        image_url: deviceForm.image
+      };
+      
+      const response = await fetch('http://localhost:5000/api/admin/product', {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(deviceData)
+      });
+      
+      if (!response.ok) {
+        if (response.status === 403) {
+          throw new Error('Admin access required');
+        }
+        throw new Error('Failed to add device');
+      }
+      
+      const data = await response.json();
       // Reset form
       setDeviceForm({
         name: '',
@@ -125,9 +221,9 @@ function ProfilePage() {
         storage: '',
         image: ''
       });
-      alert('Device added successfully!');
+      showToast('Device added successfully!', 'success');
     } catch (err) {
-      setError('Failed to add device. Please try again.');
+      setError(err.message || 'Failed to add device. Please try again.');
       console.error('Error adding device:', err);
     }
   };
@@ -136,13 +232,30 @@ function ProfilePage() {
   const handleAddAdmin = async (e) => {
     e.preventDefault();
     try {
-      // In a real app, this would be an API call to add an admin
-      console.log('Adding admin:', adminForm.email);
+      const response = await fetch('http://localhost:5000/api/admin/set-admin', {
+        method: 'PATCH',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(adminForm)
+      });
+      
+      if (!response.ok) {
+        if (response.status === 403) {
+          throw new Error('Admin access required');
+        } else if (response.status === 404) {
+          throw new Error('User not found');
+        }
+        throw new Error('Failed to add admin');
+      }
+      
+      const data = await response.json();
       // Reset form
       setAdminForm({ email: '' });
-      alert('Admin added successfully!');
+      showToast('Admin added successfully!', 'success');
     } catch (err) {
-      setError('Failed to add admin. Please try again.');
+      setError(err.message || 'Failed to add admin. Please try again.');
       console.error('Error adding admin:', err);
     }
   };
@@ -173,8 +286,18 @@ function ProfilePage() {
   // Handle logout
   const handleLogout = async () => {
     try {
-      // In a real app, this would be an API call to logout
-      console.log('Logging out user');
+      const response = await fetch('http://localhost:5000/api/logout', {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to logout');
+      }
+      
       navigate('/');
     } catch (err) {
       setError('Failed to logout. Please try again.');

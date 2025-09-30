@@ -1,79 +1,81 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { useToast } from '../assets/Toast.jsx';
+import "../Stylings/SearchPage.css";
+import { addToCart } from '../utils/cartUtils.js';
 
 function SearchPage() {
     const location = useLocation();
     const navigate = useNavigate();
+    const { showToast } = useToast();
     const searchQuery = location.state?.query || '';
     const [searchResults, setSearchResults] = useState([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        // Simulate fetching products based on search query
+        // Fetch products based on search query
         const fetchProducts = async () => {
             try {
                 setLoading(true);
-                // In a real app, this would be an API call
-                // Simulating network delay
-                await new Promise(resolve => setTimeout(resolve, 500));
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    navigate('/login');
+                    return;
+                }
                 
-                // Mock phone data based on search query
-                const mockPhones = [
-                    {
-                        id: 1,
-                        name: `${searchQuery} Pro Max`,
-                        company: 'TechBrand',
-                        price: 1099.99,
-                        image: 'https://via.placeholder.com/300x200?text=Smartphone+Pro+Max',
-                        description: 'Latest flagship smartphone with stunning display and powerful processor.'
+                const res = await fetch(`http://localhost:5000/api/product/search?query=${searchQuery}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
                     },
-                    {
-                        id: 2,
-                        name: `${searchQuery} Lite`,
-                        company: 'TechBrand',
-                        price: 599.99,
-                        image: 'https://via.placeholder.com/300x200?text=Smartphone+Lite',
-                        description: 'Affordable smartphone with great camera and long battery life.'
-                    },
-                    {
-                        id: 3,
-                        name: `${searchQuery} Ultra`,
-                        company: 'GadgetCo',
-                        price: 1299.99,
-                        image: 'https://via.placeholder.com/300x200?text=Smartphone+Ultra',
-                        description: 'Premium smartphone with cutting-edge technology and design.'
-                    },
-                    {
-                        id: 4,
-                        name: `${searchQuery} Mini`,
-                        company: 'GadgetCo',
-                        price: 799.99,
-                        image: 'https://via.placeholder.com/300x200?text=Smartphone+Mini',
-                        description: 'Compact smartphone with all the flagship features in a smaller package.'
+                    credentials: 'include', // Include cookies for authentication
+                });
+                
+                if (!res.ok) {
+                    if (res.status === 401) {
+                        console.error('Authentication required. Please log in first.');
+                        navigate('/main');
+                        return;
                     }
-                ];
+                    throw new Error('Failed to fetch products');
+                }
                 
-                setSearchResults(mockPhones);
+                const products = await res.json();
+                console.log('Fetched products:', products);
+                
+                // Filter results client-side as well if search query exists
+                let filteredResults = products || [];
+                if (searchQuery && Array.isArray(filteredResults)) {
+                    const query = searchQuery.toLowerCase();
+                    filteredResults = filteredResults.filter(product => 
+                        product.name?.toLowerCase().includes(query) || 
+                        product.description?.toLowerCase().includes(query) ||
+                        product.company?.toLowerCase().includes(query)
+                    );
+                }
+                
+                setSearchResults(filteredResults);
             } catch (error) {
                 console.error('Error fetching search results:', error);
+                setSearchResults([]);
             } finally {
                 setLoading(false);
             }
         };
 
         fetchProducts();
-    }, [searchQuery]);
+    }, [searchQuery, navigate]);
 
-    const handleAddToCart = (product) => {
-        // Get existing cart items from localStorage
-        const existingCart = JSON.parse(localStorage.getItem('cart') || '[]');
-        const updatedCart = [...existingCart, product];
-        
-        // Save updated cart to localStorage
-        localStorage.setItem('cart', JSON.stringify(updatedCart));
-        
-        // Show notification (in a real app, you would use a notification system)
-        alert(`${product.name} added to cart!`);
+    const handleAddToCart = async (product) => {
+        try {
+            // Use the API-based addToCart function
+            const result = await addToCart(product);
+            showToast(result.message, result.success ? 'success' : 'error');
+        } catch (error) {
+            console.error('Error adding to cart:', error);
+            showToast('Failed to add item to cart', 'error');
+        }
     };
 
     const handlePhoneClick = (phoneId) => {
@@ -85,31 +87,55 @@ function SearchPage() {
             <h1>Search Results for: "{searchQuery}"</h1>
             
             {loading ? (
-                <div className="loading">Loading results...</div>
+                <div className="loading">
+                    <div className="loading-spinner"></div>
+                    <p>Loading results...</p>
+                </div>
+            ) : searchResults.length === 0 ? (
+                <div className="no-results">
+                    <h2>No products found</h2>
+                    <p>Try a different search term or browse our catalog</p>
+                    <button className="browse-btn" onClick={() => navigate('/main')}>
+                        Browse Products
+                    </button>
+                </div>
             ) : (
-                <div className="search-results-grid">
-                    {searchResults.map((phone) => (
-                        <div key={phone.id} className="phone-card">
-                            <div 
-                                className="phone-image-container" 
-                                onClick={() => handlePhoneClick(phone.id)}
-                            >
-                                <img src={phone.image} alt={phone.name} />
-                            </div>
-                            <div className="phone-info">
-                                <h3 onClick={() => handlePhoneClick(phone.id)}>{phone.name}</h3>
-                                <p className="phone-company">{phone.company}</p>
-                                <p className="phone-price">${phone.price.toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
-                                <p className="phone-description">{phone.description}</p>
-                                <button 
-                                    className="add-to-cart-btn"
-                                    onClick={() => handleAddToCart(phone)}
+                <div className="search-results-container">
+                    <div className="results-count">
+                        Found {searchResults.length} product{searchResults.length !== 1 ? 's' : ''}
+                    </div>
+                    <div className="search-results-grid">
+                        {searchResults.map((phone) => (
+                            <div key={phone.id} className="phone-card">
+                                <div 
+                                    className="phone-image-container" 
+                                    onClick={() => handlePhoneClick(phone.id)}
                                 >
-                                    Add to Cart
-                                </button>
+                                    {phone.image_url ? (
+                                        <img src={phone.image_url} alt={phone.name} />
+                                    ) : (
+                                        <div className="no-image">No Image Available</div>
+                                    )}
+                                    {phone.inStock === false && (
+                                        <div className="out-of-stock-badge">Out of Stock</div>
+                                    )}
+                                </div>
+                                <div className="phone-info">
+                                    <h3 onClick={() => handlePhoneClick(phone.id)}>{phone.name}</h3>
+                                    <p className="phone-company">{phone.company}</p>
+                                    <p className="phone-price">${phone.price ? phone.price.toLocaleString(undefined, { minimumFractionDigits: 2 }) : '0.00'}</p>
+                                    <p className="phone-description">{phone.description}</p>
+                                    <button 
+                                        className="add-to-cart-btn"
+                                        onClick={() => handleAddToCart(phone)}
+                                        disabled={phone.inStock === false}
+                                    >
+                                        {phone.inStock === false ? 'Out of Stock' : 'Add to Cart'}
+                                    </button>
+                                </div>
                             </div>
-                        </div>
-                    ))}
+                        ))}
+                    </div>
                 </div>
             )}
         </div>

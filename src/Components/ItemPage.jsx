@@ -1,10 +1,16 @@
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import NavBar from '../assets/navbar.jsx';
+import { useToast } from '../assets/Toast.jsx';
 import '../Stylings/ItemPage.css';
 import { addToCart } from '../utils/cartUtils.js';
+import { useState } from 'react';
 
 function ItemPage() {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { showToast } = useToast();
+  const [isAddingToCart, setIsAddingToCart] = useState(false);
+  
   // Get item details from location state
   const { state } = location;
   
@@ -19,27 +25,60 @@ function ItemPage() {
     image: "/placeholder.jpg"
   };
   
-  const handleAddToCart = () => {
-    // Prepare item data
-    const itemData = {
-      name: item.name,
-      company: item.company,
-      price: item.price,
-      description: item.description,
-      ram: item.ram,
-      storage: item.storage,
-      image: item.image
-    };
+  const handleAddToCart = async () => {
+    if (isAddingToCart) return;
     
-    // Use the utility function to add to cart
-    const result = addToCart(itemData);
+    setIsAddingToCart(true);
     
-    // Show appropriate message based on result
-    alert(result.message);
+    try {
+      // Check if user is logged in
+      const token = localStorage.getItem('token');
+      if (!token) {
+        showToast('Please log in to add items to cart', 'error');
+        navigate('/login');
+        return;
+      }
+      
+      // Prepare item data
+      const itemData = {
+        _id: item._id, // Include the product ID
+        name: item.name,
+        company: item.company,
+        price: item.price,
+        description: item.description,
+        ram: item.ram,
+        storage: item.storage,
+        image: item.image
+      };
+      
+      // Use the utility function to add to cart (now async)
+      const result = await addToCart(itemData);
+      showToast(result.message, result.success ? 'success' : 'error');
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+      showToast('Failed to add item to cart. Please try again.', 'error');
+    } finally {
+      setIsAddingToCart(false);
+    }
   };
   
-  const handleBuyNow = () => {
-    alert(`Processing purchase for ${item.name}!`);
+  const handleBuyNow = async () => {
+    // Check if user is logged in
+    const token = localStorage.getItem('token');
+    if (!token) {
+      showToast('Please log in to continue', 'error');
+      navigate('/login');
+      return;
+    }
+    
+    // First add to cart, then navigate to checkout
+    try {
+      await handleAddToCart();
+      navigate('/cart'); // Navigate to cart/checkout page
+    } catch (error) {
+      console.error('Error processing purchase:', error);
+      showToast('Failed to process purchase. Please try again.', 'error');
+    }
   };
 
   return (
@@ -77,10 +116,18 @@ function ItemPage() {
               </div>
               
               <div className="item-actions">
-                <button className="add-to-cart-btn" onClick={handleAddToCart}>
-                  Add to Cart
+                <button 
+                  className="add-to-cart-btn" 
+                  onClick={handleAddToCart}
+                  disabled={isAddingToCart}
+                >
+                  {isAddingToCart ? 'Adding...' : 'Add to Cart'}
                 </button>
-                <button className="buy-now-btn" onClick={handleBuyNow}>
+                <button 
+                  className="buy-now-btn" 
+                  onClick={handleBuyNow}
+                  disabled={isAddingToCart}
+                >
                   Buy Now
                 </button>
               </div>

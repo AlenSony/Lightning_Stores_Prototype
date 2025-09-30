@@ -103,12 +103,15 @@
 .add-to-cart-btn,
 .buy-now-btn {
     flex: 1;
-    padding: 16px 24px;
+    padding: 1rem 2rem;
     font-size: 1.1rem;
     font-weight: bold;
     border: none;
-    border-radius: 8px;
+    border-radius: 3rem;
     cursor: pointer;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     transition: all 0.3s ease;
 }
 

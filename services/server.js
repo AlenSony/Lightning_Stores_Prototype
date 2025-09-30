@@ -11,10 +11,21 @@ import User from "../models/user.js";
 dotenv.config();
 
 const app = express();
-const port = process.env.PORT || 3000;
-const jwtSecret = process.env.JWT_SECRET;
+const port = process.env.PORT || 5000;
+const jwtSecret = process.env.JWT_SECRET || "!23qweasdz.";
 
-app.use(cors());
+const allowedOrigins = ["http://localhost:5173", "http://localhost:5174"];
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      return callback(new Error("Not allowed by CORS"));
+    },
+    credentials: true,
+  })
+);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookie(jwtSecret));
@@ -26,151 +37,214 @@ async function startServer() {
 
     // Define routes after successful database connection
     app.post("/api/signup", async (req, res) => {
-      try {
-        const { name, email, password } = req.body;
+      let responded = false;
+      const guard = setTimeout(() => {
+        if (!responded) {
+          responded = true;
+          console.error("/api/signup timed out waiting for DB");
+          return res
+            .status(503)
+            .json({ message: "Service temporarily unavailable" });
+        }
+      }, 5000);
 
-        if (!name || !email || !password) {
-          return res.status(400).json({ message: "All fields are required" });
+      try {
+        const { username, email, password } = req.body;
+        if (!username || !email || !password) {
+          responded = true;
+          clearTimeout(guard);
+          return res
+            .status(400)
+            .json({ message: "Username, email, and password are required" });
         }
 
+        // Check if user already exists
         const existingUser = await User.findOne({ email });
         if (existingUser) {
-          return res.status(400).json({ message: "Email already registered" });
+          responded = true;
+          clearTimeout(guard);
+          return res.status(409).json({ message: "User already exists" });
         }
 
-        const hashedPassword = await bcrypt.hash(password, 10);
-        const user = new User({ name, email, password: hashedPassword });
-        await user.save();
+        // Hash password
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password, salt);
 
-        const token = jwt.sign({ userId: user._id }, jwtSecret, {
+        // Create new user
+        const newUser = new User({
+          username,
+          email,
+          password: hashedPassword,
+        });
+
+        // Save user to database
+        await newUser.save();
+
+        // Create JWT token
+        const token = jwt.sign({ userId: newUser._id }, jwtSecret, {
           expiresIn: "1h",
         });
 
+        // Set cookie
         res.cookie("token", token, {
           httpOnly: true,
-          secure: false, // true in production (HTTPS)
-          sameSite: "strict",
+          maxAge: 3600000, // 1 hour
+          sameSite: "lax",
+          secure: process.env.NODE_ENV === "production",
         });
 
-        res.status(201).json({ message: "User created successfully" });
+        responded = true;
+        clearTimeout(guard);
+        res.status(201).json({
+          message: "User created successfully",
+          token, // 👈 send the JWT
+          user: {
+            id: newUser._id,
+            username: newUser.username,
+            email: newUser.email,
+          },
+        });
       } catch (err) {
-        console.error("Server Error:", err);
-        res
-          .status(500)
-          .json({ message: "Internal server error", error: err.message });
+        responded = true;
+        clearTimeout(guard);
+        console.error("Error in /api/signup:", err);
+        res.status(500).json({ message: "Internal server error" });
       }
     });
 
     app.post("/api/login", async (req, res) => {
       try {
         const { email, password } = req.body;
+        if (!email || !password) {
+          return res
+            .status(400)
+            .json({ message: "Email and password are required" });
+        }
 
+        // Find user by email
         const user = await User.findOne({ email });
-        if (!user)
-          return res.status(400).json({ message: "Invalid credentials" });
+        if (!user) {
+          return res.status(401).json({ message: "Invalid credentials" });
+        }
 
+        // Check password
         const isMatch = await bcrypt.compare(password, user.password);
-        if (!isMatch)
-          return res.status(400).json({ message: "Invalid credentials" });
+        if (!isMatch) {
+          return res.status(401).json({ message: "Invalid credentials" });
+        }
 
+        // Create JWT token
         const token = jwt.sign({ userId: user._id }, jwtSecret, {
           expiresIn: "1h",
         });
 
+        // Set cookie
         res.cookie("token", token, {
           httpOnly: true,
-          secure: false,
-          sameSite: "strict",
+          maxAge: 3600000, // 1 hour
+          sameSite: "lax",
+          secure: process.env.NODE_ENV === "production",
         });
 
-        res.json({ message: "Login successful" });
+        res.status(200).json({
+          message: "Login successful",
+          token, // 👈 send the JWT
+          user: {
+            id: user._id,
+            username: user.username,
+            email: user.email,
+          },
+        });
       } catch (err) {
-        res
-          .status(500)
-          .json({ message: "Internal server error", error: err.message });
+        console.error("Error in /api/login:", err);
+        res.status(500).json({ message: "Internal server error" });
       }
     });
-
-    const AuthMiddleware = (req, res, next) => {
-      const token = req.cookies.token;
-
-      if (!token) return res.status(401).json({ message: "No token provided" });
-
-      jwt.verify(token, jwtSecret, (err, decoded) => {
-        if (err) {
-          if (err.name === "TokenExpiredError") {
-            return res.status(401).json({ message: "Token expired" });
-          }
-          return res.status(403).json({ message: "Invalid token" });
-        }
-
-        req.user = decoded; // attach payload (e.g. userId)
-        next();
-      });
-    };
 
     app.post("/api/logout", (req, res) => {
       res.clearCookie("token");
-      res.json({ message: "Logout successful" });
+      res.status(200).json({ message: "Logout successful" });
+    });
+
+    // Middleware to check if user is authenticated
+    const AuthMiddleware = (req, res, next) => {
+      try {
+        const token = req.cookies.token;
+        if (!token) {
+          return res.status(401).json({ message: "Unauthorized" });
+        }
+
+        const decoded = jwt.verify(token, jwtSecret);
+        req.user = decoded;
+        next();
+      } catch (err) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+    };
+
+    app.get("/api/user", AuthMiddleware, async (req, res) => {
+      try {
+        const user = await User.findById(req.user.userId).select("-password");
+        if (!user) {
+          return res.status(404).json({ message: "User not found" });
+        }
+        res.status(200).json(user);
+      } catch (err) {
+        res.status(500).json({ message: "Internal server error" });
+      }
     });
 
     app.get("/api/product", AuthMiddleware, async (req, res) => {
-      const search = req.query.product_search;
-      if (!search) {
-        return res.status(400).json({ message: "Search query is required" });
+      try {
+        const products = await Device.find({});
+        res.status(200).json(products);
+      } catch (err) {
+        res.status(500).json({ message: "Internal server error" });
       }
-      const products = await Device.find({
-        name: { $regex: search, $options: "i" },
-      });
-      res.json(products);
     });
 
-    app.post("/api/admin/product", AuthMiddleware, async (req, res) => {
+    app.get("/api/product/search", AuthMiddleware, async (req, res) => {
       try {
-        const user = await User.findById(req.user.userId);
-        if (user.role !== "admin") {
-          return res.status(403).json({ message: "Admin access required" });
+        const { query } = req.query;
+
+        if (!query || query.trim() === "") {
+          return res.status(400).json({ message: "Search query is required" });
         }
-        const {
-          name,
-          company,
-          description,
-          ram,
-          storage,
-          expected_price,
-          actual_price,
-          stock,
-          category,
-          image_url,
-        } = req.body;
-        if (
-          !name ||
-          !company ||
-          !description ||
-          !ram ||
-          !storage ||
-          !expected_price ||
-          !actual_price ||
-          !stock ||
-          !category ||
-          !image_url
-        ) {
-          return res.status(400).json({ message: "All fields are required" });
-        }
-        const device = new Device({
-          name,
-          company,
-          description,
-          ram,
-          storage,
-          expected_price,
-          actual_price,
-          stock,
-          category,
-          image_url,
+
+        const products = await Device.find({
+          $or: [
+            { name: { $regex: query, $options: "i" } },
+            { description: { $regex: query, $options: "i" } },
+            { company: { $regex: query, $options: "i" } },
+          ],
         });
-        await device.save();
-        res.status(201).json({ message: "Product created successfully" });
+
+        res.status(200).json(products);
+      } catch (err) {
+        console.error("Search error:", err);
+        res.status(500).json({ message: "Internal server error" });
+      }
+    });
+
+    app.post("/api/cart", AuthMiddleware, async (req, res) => {
+      try {
+        const { productId, quantity } = req.body;
+        if (!productId || !quantity) {
+          return res
+            .status(400)
+            .json({ message: "Product ID and quantity are required" });
+        }
+        const product = await Device.findById(productId);
+        if (!product) {
+          return res.status(404).json({ message: "Product not found" });
+        }
+        const user = await User.findById(req.user.userId);
+        if (!user) {
+          return res.status(404).json({ message: "User not found" });
+        }
+        user.cart.push({ productId, quantity });
+        await user.save();
+        res.status(200).json({ message: "Product added to cart successfully" });
       } catch (err) {
         res
           .status(500)
@@ -178,62 +252,56 @@ async function startServer() {
       }
     });
 
-    app.patch("/api/admin/product/:id", AuthMiddleware, async (req, res) => {
+    app.get("/api/cart", AuthMiddleware, async (req, res) => {
       try {
-        // Check if user is admin
         const user = await User.findById(req.user.userId);
-        if (user.role !== "admin") {
-          return res.status(403).json({ message: "Admin access required" });
+        if (!user) {
+          return res.status(404).json({ message: "User not found" });
+        }
+        res.status(200).json(user.cart);
+      } catch (err) {
+        res
+          .status(500)
+          .json({ message: "Internal server error", error: err.message });
+      }
+    });
+
+    app.delete("/api/cart/:productId", AuthMiddleware, async (req, res) => {
+      try {
+        const { productId } = req.params;
+        const user = await User.findById(req.user.userId);
+        if (!user) {
+          return res.status(404).json({ message: "User not found" });
         }
 
-        const { id } = req.params;
-        const updates = req.body; // contains only fields you want to update
+        // Find the index of the item in the cart
+        const itemIndex = user.cart.findIndex(
+          (item) => item.productId.toString() === productId
+        );
 
-        const device = await Device.findById(id);
-        if (!device) {
-          return res.status(404).json({ message: "Product not found" });
+        if (itemIndex === -1) {
+          return res.status(404).json({ message: "Item not found in cart" });
         }
 
-        // Update only provided fields
-        Object.keys(updates).forEach((key) => {
-          device[key] = updates[key];
-        });
-
-        await device.save();
+        // Remove the item from the cart
+        user.cart.splice(itemIndex, 1);
+        await user.save();
 
         res
           .status(200)
-          .json({ message: "Product updated successfully", device });
+          .json({ message: "Item removed from cart successfully" });
       } catch (err) {
         res
           .status(500)
           .json({ message: "Internal server error", error: err.message });
       }
     });
-    app.delete("/api/admin/product/:id", AuthMiddleware, async (req, res) => {
-      try {
-        const user = await User.findById(req.user.userId);
-        if (user.role !== "admin") {
-          return res.status(403).json({ message: "Admin access required" });
-        }
-        const { id } = req.params;
-        const device = await Device.findById(id);
-        if (!device) {
-          return res.status(404).json({ message: "Product not found" });
-        }
-        await device.deleteOne();
-        res.status(200).json({ message: "Product deleted successfully" });
-      } catch (err) {
-        res
-          .status(500)
-          .json({ message: "Internal server error", error: err.message });
-      }
-    });
-
-    app.listen(port, () => console.log(`Server running on port ${port}`));
-  } catch (error) {
-    console.error("Failed to start server:", error);
+  } catch (err) {
+    console.error("Failed to connect to database:", err);
     process.exit(1);
   }
 }
+
 startServer();
+
+app.listen(port, () => console.log(`Server running on port ${port}`));

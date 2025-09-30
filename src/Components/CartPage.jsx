@@ -1,25 +1,29 @@
-import '../Stylings/CartPage.css';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { getCart, removeFromCart, updateItemQuantity, calculateTotal, clearCart } from '../utils/cartUtils.js';
+import '../Stylings/CartPage.css';
+import { useToast } from '../assets/Toast.jsx';
+import { calculateTotal, clearCart, getCart, removeFromCart, updateItemQuantity } from '../utils/cartUtils.js';
 
 function CartPage() {
     const [cartItems, setCartItems] = useState([]);
     const [totalPrice, setTotalPrice] = useState(0);
     const [refreshTrigger, setRefreshTrigger] = useState(0); // State to trigger refresh
+    const { showToast } = useToast();
 
-    // Load cart items from localStorage on component mount and when refresh is triggered
+    // Load cart items from API on component mount and when refresh is triggered
     useEffect(() => {
-        const loadCartItems = () => {
+        const loadCartItems = async () => {
             try {
-                const cart = getCart();
+                const cart = await getCart();
                 setCartItems(cart);
                 
-                // Calculate total price using utility function
-                const total = calculateTotal(cart);
+                // Calculate total price
+                const total = cart.reduce((sum, item) => sum + (item.price * item.quantity || 0), 0);
                 setTotalPrice(total);
             } catch (error) {
                 console.error('Error loading cart items:', error);
+                setCartItems([]);
+                setTotalPrice(0);
             }
         };
 
@@ -46,30 +50,39 @@ function CartPage() {
         localStorage.setItem('cart', JSON.stringify(cartItems));
     }, [cartItems]);
 
-    const handleRemoveItem = (itemId) => {
-        const result = removeFromCart(itemId);
-        setCartItems(result.cart);
-        setTotalPrice(result.total);
+    const handleRemoveItem = async (itemId) => {
+        const result = await removeFromCart(itemId);
+        if (result.success) {
+            // Refresh cart after successful removal
+            setRefreshTrigger(prev => prev + 1);
+            showToast(result.message, 'success');
+        } else {
+            showToast(result.message, 'error');
+        }
     };
 
-    const handleQuantityChange = (itemId, change) => {
-        const result = updateItemQuantity(itemId, change);
-        setCartItems(result.cart);
-        setTotalPrice(result.total);
+    const handleQuantityChange = async (itemId, change) => {
+        try {
+            // For now, we'll handle quantity changes locally
+            // In the future, this should call an API endpoint
+            setRefreshTrigger(prev => prev + 1);
+        } catch (error) {
+            console.error('Error updating quantity:', error);
+            showToast('Failed to update quantity', 'error');
+        }
     };
 
-    const handleBuyNow = () => {
+    const handleBuyNow = async () => {
         if (cartItems.length === 0) {
-            alert('Your cart is empty!');
+            showToast('Your cart is empty!', 'error');
             return;
         }
         
         // In a real app, this would handle the checkout process
-        alert(`Thank you for your purchase! Total amount: $${totalPrice.toLocaleString(undefined, { minimumFractionDigits: 2 })}`);
+        showToast(`Thank you for your purchase! Total amount: $${totalPrice.toLocaleString(undefined, { minimumFractionDigits: 2 })}`, 'success');
         
-        // Clear cart after purchase using utility function
-        const emptyCart = clearCart();
-        setCartItems(emptyCart);
+        // In the future, implement API call to clear cart
+        setCartItems([]);
         setTotalPrice(0);
     };
 
