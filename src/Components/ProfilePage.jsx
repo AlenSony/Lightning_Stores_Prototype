@@ -318,8 +318,7 @@ function ProfilePage() {
       <NavBar />
       <div className="profile-content">
         <header className="profile-header">
-          <h1>User Profile</h1>
-          <p className="profile-role">Role: {userRole}</p>
+          <h1>USER PROFILE</h1>
         </header>
 
         {error && (
@@ -368,13 +367,6 @@ function ProfilePage() {
                   onChange={handleUserInfoChange}
                   placeholder="Enter your address"
                 />
-                <button 
-                  type="button" 
-                  className="location-button"
-                  onClick={handleGetCurrentLocation}
-                >
-                  Use Current Location
-                </button>
               </div>
             </div>
 

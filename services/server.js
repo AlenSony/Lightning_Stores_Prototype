@@ -230,41 +230,52 @@ async function startServer() {
       }
     });
 
+    // POST /api/cart
     app.post("/api/cart", AuthMiddleware, async (req, res) => {
       try {
         const { itemId, quantity } = req.body;
-        console.log("Incoming body:", req.body);
-        console.log("User from token:", req.user);
+        const user_id = req.user?.userId || req.user?.id;
 
-        if (!itemId || !quantity) {
+        // Validate input
+        if (!itemId) {
+          return res.status(400).json({ message: "Item ID is required" });
+        }
+
+        const qty = Number(quantity) || 1;
+        if (qty < 1) {
           return res
             .status(400)
-            .json({ message: "Item ID and quantity are required" });
+            .json({ message: "Quantity must be at least 1" });
         }
+
+        if (!user_id) {
+          return res
+            .status(401)
+            .json({ message: "Unauthorized: user not found" });
+        }
+
+        const user = await User.findById(user_id);
+        if (!user) return res.status(404).json({ message: "User not found" });
 
         const product = await Device.findById(itemId);
-        if (!product) {
+        if (!product)
           return res.status(404).json({ message: "Product not found" });
-        }
 
-        const userId = req.user.userId || req.user.id; // safer extraction
-        const user = await User.findById(userId);
-        if (!user) {
-          return res.status(404).json({ message: "User not found" });
-        }
-
-        const existing_device = user.cart.find(
-          (item) => item.itemId === itemId
-        );
-
-        if (existing_device) {
-          existing_device.quantity += quantity;
+        // Check if item already exists in cart
+        const existingItem = user.cart.find((item) => item.itemId === itemId);
+        if (existingItem) {
+          existingItem.quantity += qty;
         } else {
-          user.cart.push({ itemId, quantity });
+          user.cart.push({ itemId, quantity: qty });
         }
+
         await user.save();
 
-        res.status(200).json({ message: "Product added to cart successfully" });
+        // Respond with updated cart
+        res.status(200).json({
+          message: "Product added to cart successfully",
+          cart: user.cart,
+        });
       } catch (err) {
         console.error("Error in /api/cart:", err);
         res
@@ -305,6 +316,38 @@ async function startServer() {
           .json({ message: "Internal server error", error: err.message });
       }
     });
+
+    app.put(
+      "/api/cart/update/:cartItemId",
+      AuthMiddleware,
+      async (req, res) => {
+        try {
+          const { cartItemId } = req.params;
+          const { quantity } = req.body;
+          const user = await User.findById(req.user.userId);
+          if (!user) return res.status(404).json({ message: "User not found" });
+
+          const itemIndex = user.cart.findIndex(
+            (item) => item._id.toString() === cartItemId
+          );
+
+          if (itemIndex === -1)
+            return res.status(404).json({ message: "Item not found in cart" });
+
+          user.cart[itemIndex].quantity = quantity;
+          await user.save();
+
+          res.status(200).json({
+            message: "Item quantity updated successfully",
+            cart: user.cart,
+          });
+        } catch (err) {
+          res
+            .status(500)
+            .json({ message: "Internal server error", error: err.message });
+        }
+      }
+    );
 
     app.delete(
       "/api/cart/remove/:cartItemId",

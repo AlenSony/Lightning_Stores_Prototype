@@ -81,7 +81,7 @@ function SearchPage() {
     };
 
     const handlePhoneClick = (phone) => {
-        navigate('/item', { state: phone });
+        navigate('/item', { state: { item: { ...phone, image: phone.image_url } } });
     };
 
     return (

@@ -1,8 +1,8 @@
 
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '../assets/Toast.jsx';
 import { addToCart } from '../utils/cartUtils.js';
-import { useState } from 'react';
 
 function CardComponent ({_id, name, company, price, description, ram, storage, image}) {
     const navigate = useNavigate();
@@ -13,13 +13,17 @@ function CardComponent ({_id, name, company, price, description, ram, storage, i
         // Navigate to item page with phone details as params
         navigate('/item', {
             state: {
-                name,
-                company,
-                price,
-                description,
-                ram,
-                storage,
-                image
+                item: {
+                    _id,
+                    name,
+                    company,
+                    price,
+                    image,
+                    description,
+                    ram,
+                    storage,
+                    image
+                }
             }
         });
     };
@@ -64,7 +68,7 @@ function CardComponent ({_id, name, company, price, description, ram, storage, i
     };
     
     const handleBuyNow = async (e) => {
-        e.stopPropagation(); // Prevent triggering card click
+        //e.stopPropagation(); // Prevent triggering card click
         
         // Check if user is logged in
         const token = localStorage.getItem('token');

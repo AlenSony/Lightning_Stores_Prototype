@@ -12,75 +12,27 @@ const API_BASE_URL = "http://localhost:5000/api";
  * @param {number} quantity - The new quantity (must be positive)
  * @returns {Promise<Object>} - Result with success status and message
  */
-export const updateCartItemQuantity = async (itemId, quantity) => {
-  try {
-    if (quantity < 1) {
-      return { success: false, message: "Quantity must be at least 1" };
-    }
-
-    // Get token if available
-    const token = localStorage.getItem('token');
-    let localCart = JSON.parse(localStorage.getItem("cart") || "[]");
-    
-    // Update local cart
-    const existingItemIndex = localCart.findIndex(
-      (item) => (item._id === itemId || item.id === itemId)
-    );
-
-    if (existingItemIndex >= 0) {
-      localCart[existingItemIndex].quantity = quantity;
-      localStorage.setItem("cart", JSON.stringify(localCart));
-    } else {
-      return { success: false, message: "Item not found in cart" };
-    }
-    
-    // If token exists, try to update server cart
-    if (token) {
-      const response = await fetch(`${API_BASE_URL}/cart/update`, {
-        method: "PUT",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          itemId: itemId,
-          quantity: quantity,
-        }),
-      });
-      
-      if (!response.ok) {
-        console.error("Failed to update cart on server, but local cart was updated");
-      }
-    }
-    
-    return {
-      success: true,
-      message: "Cart updated successfully",
-      cart: localCart
-    };
-  } catch (error) {
-    console.error("Error updating cart:", error);
-    return { success: false, message: "Failed to update cart" };
-  }
-};
-
-/**
- * Add an item to the cart
- * @param {Object} product - The product to add to cart
- * @returns {Promise<Object>} - Result with success status and message
- */
 export const addToCart = async (product) => {
   try {
-    // Get token if available
-    const token = localStorage.getItem('token');
-    
-    // If no token, just update local storage and return success
+    const token = localStorage.getItem("token");
+
+    // Helper to safely get cart
+    const getSafeCart = () => {
+      let cart;
+      try {
+        cart = JSON.parse(localStorage.getItem("cart"));
+      } catch (e) {
+        cart = [];
+      }
+      return Array.isArray(cart) ? cart : [];
+    };
+
+    // If no token, just update local storage
     if (!token) {
-      // Update local cart
-      const localCart = JSON.parse(localStorage.getItem("cart") || "[]");
+      let localCart = getSafeCart();
+
       const existingItemIndex = localCart.findIndex(
-        (item) => (item._id === product._id) || (item.id === product.id)
+        (item) => item._id === product._id || item.id === product.id
       );
 
       if (existingItemIndex >= 0) {
@@ -91,41 +43,42 @@ export const addToCart = async (product) => {
       }
 
       localStorage.setItem("cart", JSON.stringify(localCart));
-      
-      // Calculate total price for the cart
-      const totalPrice = localCart.reduce((sum, item) => sum + (item.price * (item.quantity || 1)), 0);
-      
+
+      const totalPrice = localCart.reduce(
+        (sum, item) => sum + item.price * (item.quantity || 1),
+        0
+      );
+
       return {
         success: true,
-        message: `${product.name || 'Item'} added to cart!`,
+        message: `${product.name || "Item"} added to cart!`,
         cart: localCart,
-        totalPrice
+        totalPrice,
       };
     }
-    
-    // If token exists, try to update server cart
-    const response = await fetch(`${API_BASE_URL}/cart`, {
-      method: "POST",
-      credentials: "include", // crucial for cookies
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}`
-      },
-      body: JSON.stringify({
-        itemId: product.id || product._id,
-        quantity: 1,
-      }),
-    });
 
-    if (!response.ok) {
-      // If server request fails, still update local storage
-      const errorData = await response.json().catch(() => ({}));
+    // If token exists → update server
+    const itemId = product.id || product._id;
+    if (!itemId) {
+      console.error("Error: Product ID is missing", product);
+      return { success: false, message: "Product ID missing" };
     }
 
-    // Update local cart if needed
-    const localCart = getCart();
+    await fetch(`${API_BASE_URL}/cart`, {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ itemId, quantity: 1 }),
+    });
+
+    // Update local cart as fallback
+    let localCart = getSafeCart();
+
     const existingItemIndex = localCart.findIndex(
-      (item) => item._id === product._id
+      (item) => item._id === product._id || item.id === product.id
     );
 
     if (existingItemIndex >= 0) {
@@ -136,34 +89,29 @@ export const addToCart = async (product) => {
     }
 
     localStorage.setItem("cart", JSON.stringify(localCart));
-    
-    // Calculate total price for the cart
-    const totalPrice = localCart.reduce((sum, item) => sum + (item.price * (item.quantity || 1)), 0);
+
+    const totalPrice = localCart.reduce(
+      (sum, item) => sum + item.price * (item.quantity || 1),
+      0
+    );
 
     return {
       success: true,
       message: `${product.name} added to cart!`,
       cart: localCart,
-      totalPrice
+      totalPrice,
     };
   } catch (error) {
     console.error("Error adding to cart:", error);
-    return {
-      success: false,
-      message: "Failed to add to cart"
-    };
+    return { success: false, message: "Failed to add to cart" };
   }
 };
 
-/**
- * Get the current cart
- * @returns {Object} - Object containing cart items and total price
- */
 export const getCart = async () => {
   try {
     // Get token if available
-    const token = localStorage.getItem('token');
-    
+    const token = localStorage.getItem("token");
+
     // If no token, just return local cart
     if (!token) {
       const cart = JSON.parse(localStorage.getItem("cart") || "[]");
@@ -171,22 +119,22 @@ export const getCart = async () => {
       const totalPrice = cart.reduce((sum, item) => {
         const price = item.price || item.productPrice || 0;
         const quantity = item.quantity || 1;
-        return sum + (price * quantity);
+        return sum + price * quantity;
       }, 0);
-      
+
       return {
         cart,
         totalPrice,
-        success: true
+        success: true,
       };
     }
-    
+
     const response = await fetch(`${API_BASE_URL}/cart`, {
       method: "GET",
       credentials: "include", // ensures cookies are sent
       headers: {
-        "Authorization": `Bearer ${token}`
-      }
+        Authorization: `Bearer ${token}`,
+      },
     });
 
     if (!response.ok) {
@@ -210,13 +158,13 @@ export const getCart = async () => {
     const totalPrice = cartItems.reduce((sum, item) => {
       const price = item.price || item.productPrice || 0;
       const quantity = item.quantity || 1;
-      return sum + (price * quantity);
+      return sum + price * quantity;
     }, 0);
-    
+
     return {
       cart: cartItems,
       totalPrice,
-      success: true
+      success: true,
     };
   } catch (error) {
     console.error("Error getting cart:", error);
@@ -224,7 +172,7 @@ export const getCart = async () => {
       cart: [],
       totalPrice: 0,
       success: false,
-      message: "Failed to get cart"
+      message: "Failed to get cart",
     };
   }
 };
@@ -274,24 +222,20 @@ export const removeFromCart = async (item_id) => {
  * @param {number} quantity - The new quantity
  * @returns {Promise<Object>} - Result with success status and message
  */
-export const updateItemQuantity = async (itemId, quantity) => {
+export const updateCartItemQuantity = async (itemId, quantity) => {
   try {
     if (quantity < 1) {
       return removeFromCart(itemId);
     }
 
-    // First, update in backend
-    const response = await fetch(`${API_BASE_URL}/cart/update`, {
+    const response = await fetch(`${API_BASE_URL}/cart/update/${itemId}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${localStorage.getItem("token")}`,
       },
       credentials: "include",
-      body: JSON.stringify({
-        productId: itemId,
-        quantity,
-      }),
+      body: JSON.stringify({ quantity }),
     });
 
     if (!response.ok) {
@@ -302,77 +246,22 @@ export const updateItemQuantity = async (itemId, quantity) => {
       };
     }
 
-    // If backend operation succeeds, update local cart
-    const localCart = getCart();
-    const updatedCart = localCart.map((item) => {
-      if (item._id === itemId) {
-        return { ...item, quantity };
-      }
-      return item;
-    });
+    // ✅ Backend sends updated cart back
+    const data = await response.json();
+    const updatedCart = data.cart;
 
-    localStorage.setItem("cart", JSON.stringify(updatedCart));
+    // ✅ Always keep localStorage as an array
+    localStorage.setItem(
+      "cart",
+      JSON.stringify(Array.isArray(updatedCart) ? updatedCart : [])
+    );
 
-    return {
-      success: true,
-      message: "Cart updated!",
-    };
+    return { success: true, message: "Cart updated!", cart: updatedCart };
   } catch (error) {
     console.error("Error updating cart:", error);
     return {
       success: false,
       message: "Failed to update cart. Please try again.",
-    };
-  }
-};
-
-/**
- * Calculate the total price of items in the cart
- * @returns {number} - The total price
- */
-export const calculateTotal = () => {
-  const cart = getCart();
-  return cart.reduce((total, item) => {
-    return total + item.price * (item.quantity || 1);
-  }, 0);
-};
-
-/**
- * Clear the entire cart
- * @returns {Promise<Object>} - Result with success status and message
- */
-export const clearCart = async () => {
-  try {
-    // First, clear in backend
-    const response = await fetch(`${API_BASE_URL}/cart/clear`, {
-      method: "DELETE",
-      credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      return {
-        success: false,
-        message: errorData.message || "Failed to clear cart",
-      };
-    }
-
-    // If backend operation succeeds, clear local cart
-    localStorage.setItem("cart", JSON.stringify([]));
-
-    return {
-      success: true,
-      message: "Cart cleared!",
-    };
-  } catch (error) {
-    console.error("Error clearing cart:", error);
-    return {
-      success: false,
-      message: "Failed to clear cart. Please try again.",
     };
   }
 };

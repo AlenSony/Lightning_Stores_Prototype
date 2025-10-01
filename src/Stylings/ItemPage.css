@@ -135,6 +135,16 @@
     transform: translateY(-2px);
 }
 
+.add-to-cart-btn {
+    background-color: #e63946;
+    color: white;
+}
+
+.add-to-cart-btn:hover {
+    background-color: #c1121f;
+    transform: translateY(-2px);
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
     .item-content {
