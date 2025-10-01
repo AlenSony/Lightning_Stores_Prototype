@@ -1,9 +1,9 @@
+import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import NavBar from '../assets/navbar.jsx';
 import { useToast } from '../assets/Toast.jsx';
 import '../Stylings/ItemPage.css';
 import { addToCart } from '../utils/cartUtils.js';
-import { useState } from 'react';
 
 function ItemPage() {
   const location = useLocation();
@@ -48,7 +48,7 @@ function ItemPage() {
         description: item.description,
         ram: item.ram,
         storage: item.storage,
-        image: item.image
+        image: item.image,
       };
       
       // Use the utility function to add to cart (now async)

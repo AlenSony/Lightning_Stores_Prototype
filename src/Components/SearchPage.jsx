@@ -78,8 +78,8 @@ function SearchPage() {
         }
     };
 
-    const handlePhoneClick = (phoneId) => {
-        navigate(`/item?id=${phoneId}`);
+    const handlePhoneClick = (phone) => {
+        navigate('/item', { state: phone });
     };
 
     return (
@@ -106,10 +106,10 @@ function SearchPage() {
                     </div>
                     <div className="search-results-grid">
                         {searchResults.map((phone) => (
-                            <div key={phone.id} className="phone-card">
+                            <div key={phone._id} className="phone-card">
                                 <div 
                                     className="phone-image-container" 
-                                    onClick={() => handlePhoneClick(phone.id)}
+                                    onClick={() => handlePhoneClick(phone)}
                                 >
                                     {phone.image_url ? (
                                         <img src={phone.image_url} alt={phone.name} />
@@ -121,9 +121,9 @@ function SearchPage() {
                                     )}
                                 </div>
                                 <div className="phone-info">
-                                    <h3 onClick={() => handlePhoneClick(phone.id)}>{phone.name}</h3>
+                                    <h3 onClick={() => handlePhoneClick(phone)}>{phone.name}</h3>
                                     <p className="phone-company">{phone.company}</p>
-                                    <p className="phone-price">${phone.price ? phone.price.toLocaleString(undefined, { minimumFractionDigits: 2 }) : '0.00'}</p>
+                                    <p className="phone-price">${phone.expected_price ? phone.expected_price.toLocaleString(undefined, { minimumFractionDigits: 2 }) : '0.00'}</p>
                                     <p className="phone-description">{phone.description}</p>
                                     <button 
                                         className="add-to-cart-btn"

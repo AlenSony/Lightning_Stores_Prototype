@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import '../Stylings/CartPage.css';
 import { useToast } from '../assets/Toast.jsx';
-import { calculateTotal, clearCart, getCart, removeFromCart, updateItemQuantity } from '../utils/cartUtils.js';
+import { getCart, removeFromCart } from '../utils/cartUtils.js';
 
 function CartPage() {
     const [cartItems, setCartItems] = useState([]);
@@ -79,7 +79,7 @@ function CartPage() {
         }
         
         // In a real app, this would handle the checkout process
-        showToast(`Thank you for your purchase! Total amount: $${totalPrice.toLocaleString(undefined, { minimumFractionDigits: 2 })}`, 'success');
+        showToast(`Proceeding to checkout! Total amount: $${(totalPrice + (totalPrice * 0.08) - (totalPrice * 0.05)).toLocaleString(undefined, { minimumFractionDigits: 2 })}`, 'success');
         
         // In the future, implement API call to clear cart
         setCartItems([]);
@@ -104,17 +104,28 @@ function CartPage() {
                 <div className="cart-container">
                     <div className="cart-items">
                         {cartItems.map((item) => (
-                            <div key={item.id} className="cart-item">
+                            <div key={item._id} className="cart-item">
                                 <div className="cart-item-image">
-                                    <img 
-                                        src={item.image || 'https://via.placeholder.com/100x100?text=Product'} 
-                                        alt={item.name}
-                                    />
+                                <img
+                                    src={
+                                    item.productImage || item.image // first, use the product's imageUrl or image if available
+                                        ? item.productImage || item.image
+                                        : `http://via.placeholder.com/100x100?text=${encodeURIComponent(item.productName || "Product")}` // fallback to http placeholder
+                                    }
+                                    onError={(e) => { 
+                                    // if placeholder fails, use local fallback
+                                    e.target.onerror = null;
+                                    e.target.src = "/fallback-product.png"; 
+                                    }}
+                                    alt={item.name || "Product"}
+                                />
                                 </div>
+
                                 <div className="cart-item-info">
-                                    <h3>{item.name}</h3>
+                                    <h3>{item.productName || item.model}</h3>
+                                    <p className="cart-item-description">{item.productDescription || item.brand}</p>
                                     <p className="cart-item-price">
-                                        ${item.price.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                                        ${ (item.productPrice ?? 0).toLocaleString(undefined, { minimumFractionDigits: 2 }) }
                                     </p>
                                     <div className="quantity-control">
                                         <button 
@@ -134,8 +145,8 @@ function CartPage() {
                                 </div>
                                 <button 
                                     className="remove-item-btn"
-                                    onClick={() => handleRemoveItem(item.id)}
-                                    aria-label={`Remove ${item.name} from cart`}
+                                    onClick={() => handleRemoveItem(item._id)}
+                                    aria-label={`Remove ${item.productName || item.model} from cart`}
                                 >
                                     <i className="fa-solid fa-trash"></i>
                                 </button>
@@ -146,22 +157,35 @@ function CartPage() {
                     <div className="cart-summary">
                         <h3>Order Summary</h3>
                         <div className="summary-row">
-                            <span>Subtotal</span>
+                            <span>Items ({cartItems.length})</span>
                             <span>${totalPrice.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
                         </div>
                         <div className="summary-row">
                             <span>Shipping</span>
                             <span>Free</span>
                         </div>
+                        <div className="summary-row">
+                            <span>Tax</span>
+                            <span>${(totalPrice * 0.08).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                        </div>
+                        <div className="summary-row discount">
+                            <span>Discount</span>
+                            <span>-${(totalPrice * 0.05).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                        </div>
+                        <div className="summary-divider"></div>
                         <div className="summary-row total">
-                            <span>Total</span>
-                            <span>${totalPrice.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                            <span>Order Total</span>
+                            <span>${(totalPrice + (totalPrice * 0.08) - (totalPrice * 0.05)).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                        </div>
+                        <div className="delivery-info">
+                            <span>Estimated delivery:</span>
+                            <span>{new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - {new Date(Date.now() + 10 * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
                         </div>
                         <button 
                             className="buy-now-btn"
                             onClick={handleBuyNow}
                         >
-                            Buy Now
+                            Proceed to Checkout
                         </button>
                         <Link to="/main" className="continue-shopping-btn small">
                             <i className="fa-solid fa-arrow-left"></i> Continue Shopping

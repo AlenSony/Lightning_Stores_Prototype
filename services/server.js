@@ -228,24 +228,33 @@ async function startServer() {
 
     app.post("/api/cart", AuthMiddleware, async (req, res) => {
       try {
-        const { productId, quantity } = req.body;
-        if (!productId || !quantity) {
+        const { itemId, quantity } = req.body;
+        console.log("Incoming body:", req.body);
+        console.log("User from token:", req.user);
+
+        if (!itemId || !quantity) {
           return res
             .status(400)
-            .json({ message: "Product ID and quantity are required" });
+            .json({ message: "Item ID and quantity are required" });
         }
-        const product = await Device.findById(productId);
+
+        const product = await Device.findById(itemId);
         if (!product) {
           return res.status(404).json({ message: "Product not found" });
         }
-        const user = await User.findById(req.user.userId);
+
+        const userId = req.user.userId || req.user.id; // safer extraction
+        const user = await User.findById(userId);
         if (!user) {
           return res.status(404).json({ message: "User not found" });
         }
-        user.cart.push({ productId, quantity });
+
+        user.cart.push({ itemId, quantity });
         await user.save();
+
         res.status(200).json({ message: "Product added to cart successfully" });
       } catch (err) {
+        console.error("Error in /api/cart:", err);
         res
           .status(500)
           .json({ message: "Internal server error", error: err.message });
@@ -258,44 +267,65 @@ async function startServer() {
         if (!user) {
           return res.status(404).json({ message: "User not found" });
         }
-        res.status(200).json(user.cart);
-      } catch (err) {
-        res
-          .status(500)
-          .json({ message: "Internal server error", error: err.message });
-      }
-    });
+        console.log("User cart:", user.cart);
 
-    app.delete("/api/cart/:productId", AuthMiddleware, async (req, res) => {
-      try {
-        const { productId } = req.params;
-        const user = await User.findById(req.user.userId);
-        if (!user) {
-          return res.status(404).json({ message: "User not found" });
-        }
-
-        // Find the index of the item in the cart
-        const itemIndex = user.cart.findIndex(
-          (item) => item.productId.toString() === productId
+        // Map cart items to include product details
+        const cartWithDetails = await Promise.all(
+          user.cart.map(async (item) => {
+            const product = await Device.findById(item.itemId);
+            return {
+              ...item.toObject(), // Convert Mongoose document to plain object
+              productName: product?.name || "Unknown Product",
+              productPrice: product?.expected_price || 0,
+              productImage:
+                product?.image_url ||
+                "http://via.placeholder.com/100x100?text=No+Image",
+              productDescription:
+                product?.description || "No description available",
+            };
+          })
         );
 
-        if (itemIndex === -1) {
-          return res.status(404).json({ message: "Item not found in cart" });
-        }
-
-        // Remove the item from the cart
-        user.cart.splice(itemIndex, 1);
-        await user.save();
-
-        res
-          .status(200)
-          .json({ message: "Item removed from cart successfully" });
+        res.status(200).json(cartWithDetails);
       } catch (err) {
         res
           .status(500)
           .json({ message: "Internal server error", error: err.message });
       }
     });
+
+    app.delete(
+      "/api/cart/remove/:cartItemId",
+      AuthMiddleware,
+      async (req, res) => {
+        try {
+          const { cartItemId } = req.params;
+          const user = await User.findById(req.user.userId);
+          if (!user) return res.status(404).json({ message: "User not found" });
+
+          const itemIndex = user.cart.findIndex(
+            (item) => item._id.toString() === cartItemId
+          );
+
+          if (itemIndex === -1)
+            return res.status(404).json({ message: "Item not found in cart" });
+
+          user.cart.splice(itemIndex, 1);
+          await user.save();
+
+          res
+            .status(200)
+            .json({
+              message: "Item removed from cart successfully",
+              cart: user.cart,
+            });
+        } catch (err) {
+          res
+            .status(500)
+            .json({ message: "Internal server error", error: err.message });
+        }
+      }
+    );
   } catch (err) {
     console.error("Failed to connect to database:", err);
     process.exit(1);

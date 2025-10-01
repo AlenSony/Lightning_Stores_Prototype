@@ -82,7 +82,6 @@ function LoginPage() {
       }
 
       console.log(`${isLogin ? 'Login' : 'Signup'} successful!`);
-      localStorage.setItem('token', response.token);
       navigate('/main');
     }
     catch(error){
