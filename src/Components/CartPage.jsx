@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import '../Stylings/CartPage.css';
 import { useToast } from '../assets/Toast.jsx';
-import { getCart, removeFromCart } from '../utils/cartUtils.js';
+import { getCart, removeFromCart, updateCartItemQuantity } from '../utils/cartUtils.js';
 
 function CartPage() {
     const [cartItems, setCartItems] = useState([]);
@@ -14,12 +14,22 @@ function CartPage() {
     useEffect(() => {
         const loadCartItems = async () => {
             try {
-                const cart = await getCart();
-                setCartItems(cart);
+                const result = await getCart();
+                setCartItems(result.cart || result);
                 
-                // Calculate total price
-                const total = cart.reduce((sum, item) => sum + (item.price * item.quantity || 0), 0);
-                setTotalPrice(total);
+                // Use the total price from the result if available, otherwise calculate it
+                if (result.totalPrice) {
+                    setTotalPrice(result.totalPrice);
+                } else {
+                    // Calculate total price from cart items
+                    const cart = result.cart || result;
+                    const total = cart.reduce((sum, item) => {
+                        const price = item.price || item.productPrice || 0;
+                        const quantity = item.quantity || 1;
+                        return sum + (price * quantity);
+                    }, 0);
+                    setTotalPrice(total);
+                }
             } catch (error) {
                 console.error('Error loading cart items:', error);
                 setCartItems([]);
@@ -63,9 +73,41 @@ function CartPage() {
 
     const handleQuantityChange = async (itemId, change) => {
         try {
-            // For now, we'll handle quantity changes locally
-            // In the future, this should call an API endpoint
-            setRefreshTrigger(prev => prev + 1);
+            // Find the current item
+            const currentItem = cartItems.find(item => item._id === itemId || item.id === itemId);
+            if (!currentItem) {
+                showToast('Item not found in cart', 'error');
+                return;
+            }
+            
+            // Calculate new quantity (minimum 1)
+            const newQuantity = Math.max(1, (currentItem.quantity || 1) + change);
+            
+            // Update the cart item quantity
+            const result = await updateCartItemQuantity(itemId, newQuantity);
+            
+            if (result.success) {
+                // Update local cart items without a full refresh
+                setCartItems(prevItems => {
+                    const updatedItems = prevItems.map(item => {
+                        if (item._id === itemId || item.id === itemId) {
+                            return { ...item, quantity: newQuantity };
+                        }
+                        return item;
+                    });
+                    return updatedItems;
+                });
+                
+                // Recalculate total price
+                setTotalPrice(prevTotal => {
+                    const itemPrice = currentItem.price || currentItem.productPrice || 0;
+                    return prevTotal + (itemPrice * change);
+                });
+                
+                showToast('Cart updated', 'success');
+            } else {
+                showToast(result.message || 'Failed to update quantity', 'error');
+            }
         } catch (error) {
             console.error('Error updating quantity:', error);
             showToast('Failed to update quantity', 'error');
@@ -130,14 +172,15 @@ function CartPage() {
                                     <div className="quantity-control">
                                         <button 
                                             className="quantity-btn minus"
-                                            onClick={() => handleQuantityChange(item.id, -1)}
+                                            onClick={() => handleQuantityChange(item._id || item.id, -1)}
+                                            disabled={item.quantity <= 1}
                                         >
                                             -
                                         </button>
                                         <span className="quantity">{item.quantity || 1}</span>
                                         <button 
                                             className="quantity-btn plus"
-                                            onClick={() => handleQuantityChange(item.id, 1)}
+                                            onClick={() => handleQuantityChange(item._id || item.id, 1)}
                                         >
                                             +
                                         </button>

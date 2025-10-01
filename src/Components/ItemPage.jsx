@@ -89,7 +89,7 @@ function ItemPage() {
         <div className="item-page-container">
           <div className="item-content">
             <div className="item-image-section">
-              <img src={item.image} alt={item.name} />
+              <img src={item.image_url} alt={item.name} />
             </div>
             
             <div className="item-details-section">
@@ -99,7 +99,7 @@ function ItemPage() {
               </div>
               
               <div className="item-price">
-                <h2>${item.price}</h2>
+                <h2>${item.expected_price}</h2>
               </div>
               
               <div className="item-description">

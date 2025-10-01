@@ -6,6 +6,7 @@ import express from "express";
 import jwt from "jsonwebtoken";
 import dbConnect from "../database/db.js";
 import Device from "../models/device.js";
+import Order from "../models/order.js";
 import User from "../models/user.js";
 
 dotenv.config();
@@ -218,6 +219,9 @@ async function startServer() {
             { company: { $regex: query, $options: "i" } },
           ],
         });
+        if (products.length === 0) {
+          return res.status(404).json({ message: "No products found" });
+        }
 
         res.status(200).json(products);
       } catch (err) {
@@ -249,7 +253,15 @@ async function startServer() {
           return res.status(404).json({ message: "User not found" });
         }
 
-        user.cart.push({ itemId, quantity });
+        const existing_device = user.cart.find(
+          (item) => item.itemId === itemId
+        );
+
+        if (existing_device) {
+          existing_device.quantity += quantity;
+        } else {
+          user.cart.push({ itemId, quantity });
+        }
         await user.save();
 
         res.status(200).json({ message: "Product added to cart successfully" });
@@ -313,12 +325,10 @@ async function startServer() {
           user.cart.splice(itemIndex, 1);
           await user.save();
 
-          res
-            .status(200)
-            .json({
-              message: "Item removed from cart successfully",
-              cart: user.cart,
-            });
+          res.status(200).json({
+            message: "Item removed from cart successfully",
+            cart: user.cart,
+          });
         } catch (err) {
           res
             .status(500)
@@ -326,6 +336,71 @@ async function startServer() {
         }
       }
     );
+
+    app.post("/api/order/buy_now", AuthMiddleware, async (req, res) => {
+      try {
+        const { itemId, quantity } = req.body;
+        const userId = req.user.userId || req.user.id; // safer extraction
+        const user = await User.findById(userId);
+        if (!user) {
+          return res.status(404).json({ message: "User not found" });
+        }
+
+        const product = await Device.findById(itemId);
+        if (!product) {
+          return res.status(404).json({ message: "Product not found" });
+        }
+        // Create order
+        const order = new Order({
+          userId,
+          items: [{ itemId, quantity }],
+          totalPrice: product.expected_price * quantity,
+        });
+        await order.save();
+
+        res.status(200).json({
+          message: "Order placed successfully",
+          order,
+        });
+      } catch (err) {
+        res
+          .status(500)
+          .json({ message: "Internal server error", error: err.message });
+      }
+    });
+
+    app.post("/api/cart/checkout", AuthMiddleware, async (req, res) => {
+      try {
+        const user = await User.findById(req.user.userId);
+        if (!user) {
+          return res.status(404).json({ message: "User not found" });
+        }
+        if (user.cart.length === 0) {
+          return res.status(400).json({ message: "Cart is empty" });
+        }
+        // Create order
+        const order = new Order({
+          userId,
+          items: user.cart,
+          totalPrice: user.cart.reduce(
+            (total, item) => total + item.productPrice * item.quantity,
+            0
+          ),
+        });
+        await order.save();
+        // Clear cart
+        user.cart = [];
+        await user.save();
+        res.status(200).json({
+          message: "Order placed successfully",
+          order,
+        });
+      } catch (err) {
+        res
+          .status(500)
+          .json({ message: "Internal server error", error: err.message });
+      }
+    });
   } catch (err) {
     console.error("Failed to connect to database:", err);
     process.exit(1);

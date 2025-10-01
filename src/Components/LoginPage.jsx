@@ -80,7 +80,8 @@ function LoginPage() {
         console.log(errorData);
         throw new Error(errorData.message);
       }
-
+      const data = await response.json();
+      localStorage.setItem("token", data.token);
       console.log(`${isLogin ? 'Login' : 'Signup'} successful!`);
       navigate('/main');
     }

@@ -24,10 +24,11 @@ function OrderSchema() {
       type: Date,
       default: Date.now,
     },
+    payment_status: {
+      type: String,
+      default: "pending",
+    },
   });
-
-  const Order = mongoose.models.Order || mongoose.model("Order", OrderSchema());
-  return Order;
 }
-
+const Order = mongoose.models.Order || mongoose.model("Order", OrderSchema());
 export default Order;

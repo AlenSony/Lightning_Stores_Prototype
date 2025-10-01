@@ -32,12 +32,8 @@ function MainPage() {
                 
                 console.log('API Response:', res);
                 if (!res.ok) {
-                    if (res.status === 401) {
-                        console.error('Authentication required. Please log in first.');
-                        // Redirect to login page if not authenticated
-                        window.location.href = '/login';
-                        return;
-                    }
+                    // Don't redirect to login, just log the error
+                    console.error('Failed to fetch products:', res.status);
                     throw new Error('Failed to fetch products');
                 }
                 

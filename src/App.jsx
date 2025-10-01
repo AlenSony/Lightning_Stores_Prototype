@@ -12,6 +12,7 @@ function App() {
     <ToastProvider>
       <Routes>
         <Route path="/" element={<LoginPage />} />
+        <Route path="/login" element={<LoginPage />} />
         <Route path="/main" element={<MainPage />} />
         <Route path="/item" element={<ItemPage />} />
         <Route path="/profile" element={<ProfilePage />} />

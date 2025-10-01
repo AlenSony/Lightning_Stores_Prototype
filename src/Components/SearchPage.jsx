@@ -17,25 +17,27 @@ function SearchPage() {
         const fetchProducts = async () => {
             try {
                 setLoading(true);
+                // Get token if available, but don't redirect if missing
                 const token = localStorage.getItem('token');
-                if (!token) {
-                    navigate('/login');
-                    return;
+                
+                const headers = {
+                    'Content-Type': 'application/json'
+                };
+                
+                // Only add Authorization header if token exists
+                if (token) {
+                    headers['Authorization'] = `Bearer ${token}`;
                 }
                 
                 const res = await fetch(`http://localhost:5000/api/product/search?query=${searchQuery}`, {
                     method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    credentials: 'include', // Include cookies for authentication
+                    credentials: 'include',
+                    headers: headers
                 });
                 
                 if (!res.ok) {
                     if (res.status === 401) {
                         console.error('Authentication required. Please log in first.');
-                        navigate('/main');
                         return;
                     }
                     throw new Error('Failed to fetch products');
