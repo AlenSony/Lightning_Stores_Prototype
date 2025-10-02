@@ -22,7 +22,6 @@ function CardComponent ({_id, name, company, price, description, ram, storage, i
                     description,
                     ram,
                     storage,
-                    image
                 }
             }
         });

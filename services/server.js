@@ -50,13 +50,13 @@ async function startServer() {
       }, 5000);
 
       try {
-        const { username, email, password } = req.body;
-        if (!username || !email || !password) {
+        const { name, email, password } = req.body;
+        if (!name || !email || !password) {
           responded = true;
           clearTimeout(guard);
           return res
             .status(400)
-            .json({ message: "Username, email, and password are required" });
+            .json({ message: "Name, email, and password are required" });
         }
 
         // Check if user already exists
@@ -73,7 +73,7 @@ async function startServer() {
 
         // Create new user
         const newUser = new User({
-          username,
+          name,
           email,
           password: hashedPassword,
         });
@@ -83,13 +83,13 @@ async function startServer() {
 
         // Create JWT token
         const token = jwt.sign({ userId: newUser._id }, jwtSecret, {
-          expiresIn: "1h",
+          expiresIn: "3h",
         });
 
         // Set cookie
         res.cookie("token", token, {
           httpOnly: true,
-          maxAge: 3600000, // 1 hour
+          maxAge: 10800000, // 3 hours
           sameSite: "lax",
           secure: process.env.NODE_ENV === "production",
         });
@@ -101,7 +101,7 @@ async function startServer() {
           token, // 👈 send the JWT
           user: {
             id: newUser._id,
-            username: newUser.username,
+            name: newUser.name,
             email: newUser.email,
           },
         });
@@ -136,13 +136,13 @@ async function startServer() {
 
         // Create JWT token
         const token = jwt.sign({ userId: user._id }, jwtSecret, {
-          expiresIn: "1h",
+          expiresIn: "3h",
         });
 
         // Set cookie
         res.cookie("token", token, {
           httpOnly: true,
-          maxAge: 3600000, // 1 hour
+          maxAge: 10800000, // 3 hours
           sameSite: "lax",
           secure: process.env.NODE_ENV === "production",
         });
@@ -152,7 +152,7 @@ async function startServer() {
           token, // 👈 send the JWT
           user: {
             id: user._id,
-            username: user.username,
+            name: user.name,
             email: user.email,
           },
         });
@@ -194,6 +194,29 @@ async function startServer() {
         res.status(500).json({ message: "Internal server error" });
       }
     });
+
+    app.patch("/api/user/profile", AuthMiddleware, async (req, res) => {
+      try {
+        const { name, email, address, phone } = req.body; // ✅ include all fields
+        
+        const user = await User.findById(req.user.userId);
+        if (!user) {
+          return res.status(404).json({ message: "User not found" });
+        }
+    
+        if (name) user.name = name;
+        if (email) user.email = email;
+        if (address) user.address = address;
+        if (phone) user.phone = phone;
+    
+        await user.save();
+        res.status(200).json({ message: "Profile updated successfully", user });
+      } catch (err) {
+        console.error("Error updating profile:", err);
+        res.status(500).json({ message: "Internal server error" });
+      }
+    });
+    
 
     app.get("/api/product", AuthMiddleware, async (req, res) => {
       try {
@@ -261,8 +284,10 @@ async function startServer() {
         if (!product)
           return res.status(404).json({ message: "Product not found" });
 
-        // Check if item already exists in cart
-        const existingItem = user.cart.find((item) => item.itemId === itemId);
+        // Check if item already exists in cart (normalize ObjectId vs string)
+        const existingItem = user.cart.find(
+          (item) => (item.itemId?.toString ? item.itemId.toString() : String(item.itemId)) === String(itemId)
+        );
         if (existingItem) {
           existingItem.quantity += qty;
         } else {
@@ -294,17 +319,16 @@ async function startServer() {
 
         // Map cart items to include product details
         const cartWithDetails = await Promise.all(
-          user.cart.map(async (item) => {
-            const product = await Device.findById(item.itemId);
+          (user.cart || []).map(async (item) => {
+            const normalizedItemId = item.itemId?.toString ? item.itemId.toString() : String(item.itemId || "");
+            const product = normalizedItemId ? await Device.findById(normalizedItemId) : null;
             return {
-              ...item.toObject(), // Convert Mongoose document to plain object
+              itemId: normalizedItemId,
+              quantity: Number(item.quantity) || 1,
               productName: product?.name || "Unknown Product",
-              productPrice: product?.expected_price || 0,
-              productImage:
-                product?.image_url ||
-                "http://via.placeholder.com/100x100?text=No+Image",
-              productDescription:
-                product?.description || "No description available",
+              productPrice: Number(product?.expected_price) || 0,
+              productImage: product?.image_url || "http://via.placeholder.com/100x100?text=No+Image",
+              productDescription: product?.description || "No description available",
             };
           })
         );
@@ -358,9 +382,7 @@ async function startServer() {
           const user = await User.findById(req.user.userId);
           if (!user) return res.status(404).json({ message: "User not found" });
 
-          const itemIndex = user.cart.findIndex(
-            (item) => item._id.toString() === cartItemId
-          );
+          const itemIndex = user.cart.findIndex((item) => item._id?.toString() === cartItemId);
 
           if (itemIndex === -1)
             return res.status(404).json({ message: "Item not found in cart" });
@@ -379,6 +401,33 @@ async function startServer() {
         }
       }
     );
+
+    // PATCH /api/admin/set-admin - grant admin role to a user by email
+    app.patch("/api/admin/set-admin", AuthMiddleware, async (req, res) => {
+      try {
+        const requestingUser = await User.findById(req.user.userId);
+        if (!requestingUser || requestingUser.role !== "admin") {
+          return res.status(403).json({ message: "Admin access required" });
+        }
+
+        const { email } = req.body || {};
+        if (!email) {
+          return res.status(400).json({ message: "Email is required" });
+        }
+
+        const targetUser = await User.findOne({ email });
+        if (!targetUser) {
+          return res.status(404).json({ message: "User not found" });
+        }
+
+        targetUser.role = "admin";
+        await targetUser.save();
+        return res.status(200).json({ message: "User promoted to admin" });
+      } catch (err) {
+        console.error("Error in /api/admin/set-admin:", err);
+        return res.status(500).json({ message: "Internal server error" });
+      }
+    });
 
     app.post("/api/order/buy_now", AuthMiddleware, async (req, res) => {
       try {

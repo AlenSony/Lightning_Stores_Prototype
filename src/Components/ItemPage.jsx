@@ -106,6 +106,7 @@ function ItemPage() {
                   className="add-to-cart-btn" 
                   onClick={handleAddToCart}
                   disabled={isAddingToCart}
+                  style={{cursor: isAddingToCart ? 'not-allowed' : 'pointer', backgroundColor: isAddingToCart ? '#ccc' : '#4CAF50', color: isAddingToCart ? '#fff' : '#fff', border: isAddingToCart ? 'none' : 'none',}}
                 >
                   {isAddingToCart ? 'Adding...' : 'Add to Cart'}
                 </button>

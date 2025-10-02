@@ -145,8 +145,8 @@ function CartPage() {
             ) : (
                 <div className="cart-container">
                     <div className="cart-items">
-                        {cartItems.map((item) => (
-                            <div key={item._id} className="cart-item">
+                        {cartItems.map((item, idx) => (
+                            <div key={item._id || item.itemId || item.id || idx} className="cart-item">
                                 <div className="cart-item-image">
                                 <img
                                     src={
@@ -172,7 +172,7 @@ function CartPage() {
                                     <div className="quantity-control">
                                         <button 
                                             className="quantity-btn minus"
-                                            onClick={() => handleQuantityChange(item._id || item.id, -1)}
+                                            onClick={() => handleQuantityChange(item._id || item.itemId || item.id, -1)}
                                             disabled={item.quantity <= 1}
                                         >
                                             -
@@ -180,7 +180,7 @@ function CartPage() {
                                         <span className="quantity">{item.quantity || 1}</span>
                                         <button 
                                             className="quantity-btn plus"
-                                            onClick={() => handleQuantityChange(item._id || item.id, 1)}
+                                            onClick={() => handleQuantityChange(item._id || item.itemId || item.id, 1)}
                                         >
                                             +
                                         </button>
@@ -188,7 +188,7 @@ function CartPage() {
                                 </div>
                                 <button 
                                     className="remove-item-btn"
-                                    onClick={() => handleRemoveItem(item._id)}
+                                    onClick={() => handleRemoveItem(item._id || item.itemId || item.id)}
                                     aria-label={`Remove ${item.productName || item.model} from cart`}
                                 >
                                     <i className="fa-solid fa-trash"></i>
