@@ -1,0 +1,158 @@
+.order-page {
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #333;
+}
+
+.order-page h1 {
+    text-align: center;
+    color: #2c3e50;
+    margin-bottom: 30px;
+    font-size: 2.5em;
+    font-weight: 700;
+}
+
+.empty-orders {
+    text-align: center;
+    padding: 50px;
+    border: 1px dashed #ccc;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+}
+
+.empty-orders p {
+    font-size: 1.2em;
+    color: #777;
+    margin-bottom: 20px;
+}
+
+.empty-orders .fa-box-open {
+    font-size: 4em;
+    color: #999;
+    margin-bottom: 20px;
+}
+
+.order-list {
+    display: grid;
+    gap: 30px;
+}
+
+.order-card {
+    background-color: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    padding: 25px;
+    transition: transform 0.2s ease-in-out;
+}
+
+.order-card:hover {
+    transform: translateY(-5px);
+}
+
+.order-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #eee;
+}
+
+.order-header h2 {
+    font-size: 1.8em;
+    color: #34495e;
+    margin: 0;
+}
+
+.order-header .order-date {
+    font-size: 0.9em;
+    color: #7f8c8d;
+}
+
+.order-details {
+    margin-bottom: 20px;
+}
+
+.order-details p {
+    margin: 5px 0;
+    font-size: 1em;
+    color: #555;
+}
+
+.order-details strong {
+    color: #2c3e50;
+}
+
+.order-items-list {
+    border-top: 1px solid #eee;
+    padding-top: 20px;
+}
+
+.order-items-list h3 {
+    font-size: 1.4em;
+    color: #34495e;
+    margin-bottom: 15px;
+}
+
+.order-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+    padding: 15px;
+    background-color: #fdfdfd;
+    border-radius: 8px;
+    border: 1px solid #f0f0f0;
+}
+
+.order-item-image img {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 5px;
+    margin-right: 20px;
+    border: 1px solid #ddd;
+}
+
+.order-item-info {
+    flex-grow: 1;
+}
+
+.order-item-info h4 {
+    margin: 0 0 5px 0;
+    font-size: 1.2em;
+    color: #2c3e50;
+}
+
+.order-item-info p {
+    margin: 0;
+    font-size: 0.9em;
+    color: #666;
+}
+
+.device-price {
+    font-weight: bold;
+    color: #e74c3c;
+    font-size: 1.1em;
+    margin-top: 5px;
+}
+
+.back-to-profile-btn {
+    display: block;
+    width: fit-content;
+    margin: 30px auto 0;
+    padding: 12px 25px;
+    background-color: #3498db;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    font-size: 1.1em;
+    font-weight: 600;
+    transition: background-color 0.3s ease;
+}
+
+.back-to-profile-btn:hover {
+    background-color: #2980b9;
+}

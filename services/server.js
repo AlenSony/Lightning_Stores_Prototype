@@ -170,7 +170,11 @@ async function startServer() {
     // Middleware to check if user is authenticated
     const AuthMiddleware = (req, res, next) => {
       try {
-        const token = req.cookies.token;
+        let token = req.cookies.token;
+        if (!token && req.headers.authorization) {
+          token = req.headers.authorization.split(" ")[1]; // Extract token from "Bearer <token>"
+        }
+
         if (!token) {
           return res.status(401).json({ message: "Unauthorized" });
         }
@@ -198,17 +202,17 @@ async function startServer() {
     app.patch("/api/user/profile", AuthMiddleware, async (req, res) => {
       try {
         const { name, email, address, phone } = req.body; // ✅ include all fields
-        
+
         const user = await User.findById(req.user.userId);
         if (!user) {
           return res.status(404).json({ message: "User not found" });
         }
-    
+
         if (name) user.name = name;
         if (email) user.email = email;
         if (address) user.address = address;
         if (phone) user.phone = phone;
-    
+
         await user.save();
         res.status(200).json({ message: "Profile updated successfully", user });
       } catch (err) {
@@ -216,7 +220,6 @@ async function startServer() {
         res.status(500).json({ message: "Internal server error" });
       }
     });
-    
 
     app.get("/api/product", AuthMiddleware, async (req, res) => {
       try {
@@ -286,7 +289,10 @@ async function startServer() {
 
         // Check if item already exists in cart (normalize ObjectId vs string)
         const existingItem = user.cart.find(
-          (item) => (item.itemId?.toString ? item.itemId.toString() : String(item.itemId)) === String(itemId)
+          (item) =>
+            (item.itemId?.toString
+              ? item.itemId.toString()
+              : String(item.itemId)) === String(itemId)
         );
         if (existingItem) {
           existingItem.quantity += qty;
@@ -320,15 +326,23 @@ async function startServer() {
         // Map cart items to include product details
         const cartWithDetails = await Promise.all(
           (user.cart || []).map(async (item) => {
-            const normalizedItemId = item.itemId?.toString ? item.itemId.toString() : String(item.itemId || "");
-            const product = normalizedItemId ? await Device.findById(normalizedItemId) : null;
+            const normalizedItemId = item.itemId?.toString
+              ? item.itemId.toString()
+              : String(item.itemId || "");
+            const product = normalizedItemId
+              ? await Device.findById(normalizedItemId)
+              : null;
             return {
+              _id: item._id, // Include the cart item's unique _id
               itemId: normalizedItemId,
               quantity: Number(item.quantity) || 1,
               productName: product?.name || "Unknown Product",
               productPrice: Number(product?.expected_price) || 0,
-              productImage: product?.image_url || "http://via.placeholder.com/100x100?text=No+Image",
-              productDescription: product?.description || "No description available",
+              productImage:
+                product?.image_url ||
+                "http://via.placeholder.com/100x100?text=No+Image",
+              productDescription:
+                product?.description || "No description available",
             };
           })
         );
@@ -338,6 +352,56 @@ async function startServer() {
         res
           .status(500)
           .json({ message: "Internal server error", error: err.message });
+      }
+    });
+
+    app.get("/api/order/my-orders", AuthMiddleware, async (req, res) => {
+      try {
+        const userId = req.user.userId;
+
+        // Fetch all orders for this user and populate device info
+        const orders = await Order.find({ user_id: userId })
+          .populate({
+            path: "items.itemId",
+            model: "Device",
+            select:
+              "name company description ram storage expected_price actual_price image_url category",
+          })
+          .lean();
+
+        if (!orders || orders.length === 0) {
+          return res.status(200).json([]); // No orders yet
+        }
+
+        const formattedOrders = orders.map((order) => ({
+          orderId: order._id,
+          orderDate: order.order_date,
+          totalPrice: order.total_price,
+          paymentStatus: order.payment_status,
+          devices: order.items.map((item) => {
+            return {
+              id: item.itemId?._id || item.itemId || "unknown",
+              name: item.itemId?.name || "Unknown Device",
+              company: item.itemId?.company || "N/A",
+              description: item.itemId?.description || "",
+              ram: item.itemId?.ram || "-",
+              storage: item.itemId?.storage || "-",
+              expectedPrice: Number(item.itemId?.expected_price) || 0,
+              actualPrice: Number(item.itemId?.actual_price) || 0,
+              category: item.itemId?.category || "",
+              imageUrl: item.itemId?.image_url || "/fallback-product.png",
+              quantity: item.quantity,
+            };
+          }),
+        }));
+
+        res.status(200).json(formattedOrders);
+      } catch (err) {
+        console.error("Error fetching user orders:", err);
+        res.status(500).json({
+          message: "Internal server error",
+          error: err.message,
+        });
       }
     });
 
@@ -382,7 +446,9 @@ async function startServer() {
           const user = await User.findById(req.user.userId);
           if (!user) return res.status(404).json({ message: "User not found" });
 
-          const itemIndex = user.cart.findIndex((item) => item._id?.toString() === cartItemId);
+          const itemIndex = user.cart.findIndex(
+            (item) => item._id?.toString() === cartItemId
+          );
 
           if (itemIndex === -1)
             return res.status(404).json({ message: "Item not found in cart" });
@@ -460,43 +526,52 @@ async function startServer() {
           .json({ message: "Internal server error", error: err.message });
       }
     });
-
     app.post("/api/cart/checkout", AuthMiddleware, async (req, res) => {
       try {
         const user = await User.findById(req.user.userId);
         if (!user) {
+          console.log("User not found");
           return res.status(404).json({ message: "User not found" });
         }
+
         if (user.cart.length === 0) {
           return res.status(400).json({ message: "Cart is empty" });
         }
-        // Create order
+
+        const { items, totalPrice } = req.body; // from frontend
+        if (!items || items.length === 0 || !totalPrice) {
+          return res.status(400).json({ message: "Invalid checkout data" });
+        }
+
+        // ✅ Match schema field names
         const order = new Order({
-          userId,
-          items: user.cart,
-          totalPrice: user.cart.reduce(
-            (total, item) => total + item.productPrice * item.quantity,
-            0
-          ),
+          user_id: user._id,
+          items: items.map((item) => ({
+            itemId: item.itemId,
+            quantity: item.quantity,
+          })),
+          total_price: totalPrice,
         });
+
         await order.save();
-        // Clear cart
+
+        // ✅ Clear user cart after placing order
         user.cart = [];
         await user.save();
+
         res.status(200).json({
           message: "Order placed successfully",
           order,
         });
       } catch (err) {
-        res
-          .status(500)
-          .json({ message: "Internal server error", error: err.message });
+        console.error("Checkout error:", err);
+        res.status(500).json({
+          message: "Internal server error",
+          error: err.message,
+        });
       }
     });
-  } catch (err) {
-    console.error("Failed to connect to database:", err);
-    process.exit(1);
-  }
+  } catch (err) {}
 }
 
 startServer();

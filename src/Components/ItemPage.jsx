@@ -106,7 +106,8 @@ function ItemPage() {
                   className="add-to-cart-btn" 
                   onClick={handleAddToCart}
                   disabled={isAddingToCart}
-                  style={{cursor: isAddingToCart ? 'not-allowed' : 'pointer', backgroundColor: isAddingToCart ? '#ccc' : '#4CAF50', color: isAddingToCart ? '#fff' : '#fff', border: isAddingToCart ? 'none' : 'none',}}
+                  style={{ backgroundColor: '#e63946', color: '#fff', border: 'none', borderRadius: '3rem', padding: '1rem 2rem', fontSize: '1.1rem', fontWeight: 'bold', cursor: 'pointer', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)', transition: 'all 0.3s ease', }}
+
                 >
                   {isAddingToCart ? 'Adding...' : 'Add to Cart'}
                 </button>
@@ -114,6 +115,7 @@ function ItemPage() {
                   className="buy-now-btn" 
                   onClick={handleBuyNow}
                   disabled={isAddingToCart}
+                  style={{ backgroundColor: '#e63946', color: '#fff', border: 'none', borderRadius: '3rem', padding: '1rem 2rem', fontSize: '1.1rem', fontWeight: 'bold', cursor: 'pointer', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)', transition: 'all 0.3s ease', }}
                 >
                   Buy Now
                 </button>

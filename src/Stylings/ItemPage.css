@@ -116,11 +116,7 @@
 }
 
 /* Buy Now = primary button */
-.buy-now-btn {
-    background-color: #e63946;
-    color: #fff;
-    border: none;
-}
+
 
 .buy-now-btn:hover {
     background-color: #c1121f;

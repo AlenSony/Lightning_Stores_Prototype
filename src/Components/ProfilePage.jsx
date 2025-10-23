@@ -382,9 +382,8 @@ function ProfilePage() {
               />
             </div>
 
-            <button type="submit" className="update-button">
-              Update Profile
-            </button>
+            <button type="submit" className="profile-button">Update Profile</button>
+            <button type="button" className="profile-button view-orders-button" onClick={() => navigate('/orders')}>View Orders</button>
           </form>
         </section>
 

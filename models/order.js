@@ -7,15 +7,19 @@ function OrderSchema() {
       ref: "User",
       required: true,
     },
-    item_id: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Device",
-      required: true,
-    },
-    quantity: {
-      type: Number,
-      required: true,
-    },
+    items: [
+      {
+        itemId: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Device",
+          required: true,
+        },
+        quantity: {
+          type: Number,
+          required: true,
+        },
+      },
+    ],
     total_price: {
       type: Number,
       required: true,

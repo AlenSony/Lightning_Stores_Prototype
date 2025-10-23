@@ -182,39 +182,7 @@ export const getCart = async () => {
  * @param {string} item_id - The ID of the item to remove
  * @returns {Promise<Object>} - Result with success status and message
  */
-export const removeFromCart = async (item_id) => {
-  if (!item_id) {
-    console.error("removeFromCart called with undefined itemId");
-    return { success: false, message: "Invalid item ID" };
-  }
 
-  try {
-    const response = await fetch(`${API_BASE_URL}/cart/remove/${item_id}`, {
-      method: "DELETE",
-      credentials: "include",
-    });
-
-    // Try to parse JSON safely
-    let data;
-    try {
-      data = await response.json();
-    } catch {
-      data = {};
-    }
-
-    if (!response.ok) {
-      return {
-        success: false,
-        message: data.message || "Failed to remove item from cart",
-      };
-    }
-
-    return { success: true, message: data.message, cart: data.cart || [] };
-  } catch (error) {
-    console.error("Error removing from cart:", error);
-    return { success: false, message: "Failed to remove item from cart" };
-  }
-};
 
 /**
  * Update the quantity of an item in the cart
@@ -222,46 +190,73 @@ export const removeFromCart = async (item_id) => {
  * @param {number} quantity - The new quantity
  * @returns {Promise<Object>} - Result with success status and message
  */
-export const updateCartItemQuantity = async (itemId, quantity) => {
+export const updateCartItemQuantity = async (cartItemId, quantity) => {
   try {
-    if (quantity < 1) {
-      return removeFromCart(itemId);
+    const token = localStorage.getItem("token");
+    if (!token) {
+      console.error("No token found — user not logged in");
+      return { error: "Unauthorized" };
     }
 
-    const response = await fetch(`${API_BASE_URL}/cart/update/${itemId}`, {
+    const response = await fetch(`${API_BASE_URL}/cart/update/${cartItemId}`, {
       method: "PUT",
+      credentials: "include",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
+        Authorization: `Bearer ${token}`, // ✅ FIXED HERE
       },
-      credentials: "include",
       body: JSON.stringify({ quantity }),
     });
 
     if (!response.ok) {
-      const errorData = await response.json();
-      return {
-        success: false,
-        message: errorData.message || "Failed to update item quantity",
-      };
+      const data = await response.json();
+      throw new Error(data.message || "Failed to update cart item quantity");
     }
 
-    // ✅ Backend sends updated cart back
-    const data = await response.json();
-    const updatedCart = data.cart;
-
-    // ✅ Always keep localStorage as an array
-    localStorage.setItem(
-      "cart",
-      JSON.stringify(Array.isArray(updatedCart) ? updatedCart : [])
-    );
-
-    return { success: true, message: "Cart updated!", cart: updatedCart };
-  } catch (error) {
-    console.error("Error updating cart:", error);
-    return {
-      success: false,
-      message: "Failed to update cart. Please try again.",
-    };
+    return await response.json();
+  } catch (err) {
+    console.error("Error updating quantity:", err);
+    return { success: false, message: err.message };
   }
 };
+
+
+
+export const removeFromCart = async (cartItemId) => {
+  try {
+    const token = localStorage.getItem("token");
+
+    // If no token, remove from local storage
+    if (!token) {
+      let localCart = JSON.parse(localStorage.getItem("cart") || "[]");
+      const updatedCart = localCart.filter((item) => item._id !== cartItemId);
+      localStorage.setItem("cart", JSON.stringify(updatedCart));
+      return { success: true, message: "Item removed from local cart" };
+    }
+
+    // If token exists, remove from server
+    const response = await fetch(`${API_BASE_URL}/cart/remove/${cartItemId}`, {
+      method: "DELETE",
+      credentials: "include",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || "Failed to remove item from cart");
+    }
+
+    // Update local cart after successful server removal
+    let localCart = JSON.parse(localStorage.getItem("cart") || "[]");
+    const updatedCart = localCart.filter((item) => item._id !== cartItemId);
+    localStorage.setItem("cart", JSON.stringify(updatedCart));
+
+    return { success: true, message: "Item removed from cart" };
+  } catch (err) {
+    console.error("Error removing item:", err);
+    return { success: false, message: err.message || "Error removing item" };
+  }
+};
+
