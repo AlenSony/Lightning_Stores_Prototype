@@ -30,7 +30,7 @@ function MainPage() {
                     }
                 });
                 
-                console.log('API Response:', res);
+                
                 if (!res.ok) {
                     // Don't redirect to login, just log the error
                     console.error('Failed to fetch products:', res.status);
@@ -38,7 +38,6 @@ function MainPage() {
                 }
                 
                 const data = await res.json();
-                console.log('Fetched devices:', data);
                 setDevices(data || []);
             } catch (e) {
                 console.error('Failed to load devices:', e);

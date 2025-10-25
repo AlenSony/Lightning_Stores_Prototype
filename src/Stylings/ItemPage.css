@@ -100,41 +100,7 @@
     margin-top: auto;
 }
 
-/* Shared button styles */
-.add-to-cart-btn,
-.buy-now-btn {
-    flex: 1;
-    padding: 1rem 2rem;
-    font-size: 1.1rem;
-    font-weight: bold;
-    border-radius: 3rem;
-    cursor: pointer;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    transition: all 0.3s ease;
-}
 
-/* Buy Now = primary button */
-
-
-.buy-now-btn:hover {
-    background-color: #c1121f;
-    transform: translateY(-2px);
-}
-
-/* Add to Cart = secondary (outlined) */
-.add-to-cart-btn {
-    background-color: #fff;
-    color: #e63946;
-    border: 2px solid #e63946;
-}
-
-.add-to-cart-btn:hover {
-    background-color: #e63946;
-    color: #fff;
-    transform: translateY(-2px);
-}
 
 
 /* Responsive Design */

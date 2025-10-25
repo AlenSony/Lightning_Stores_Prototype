@@ -84,12 +84,8 @@ function CartPage() {
         const totalWithTax = totalPrice + totalPrice * 0.08 - totalPrice * 0.05;
         let response;
         try{
-            const userData = JSON.parse(localStorage.getItem('user'));
-            const userId = userData ? userData.id : null;
-            const token = localStorage.getItem('token'); 
-            // Get token directly from localStorage
-
-            if (!userId) {
+            const token = localStorage.getItem('token');
+            if (!token) {
                 showToast('User not logged in.', 'error');
                 return;
             }
@@ -107,7 +103,7 @@ function CartPage() {
                     "Authorization": `Bearer ${token}`,
                 },
                 body: JSON.stringify({
-                    userId: userData.id,
+                    userId: token,
                     items: cartItems.map(item => ({ itemId: item.itemId, quantity: item.quantity })),
                     totalPrice: totalWithTax,
                 }),

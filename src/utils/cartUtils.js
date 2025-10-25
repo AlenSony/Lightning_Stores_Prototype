@@ -151,7 +151,7 @@ export const getCart = async () => {
     }
 
     const data = await response.json();
-    console.log("Cart data:", data);
+    
 
     // Ensure we always return cart items and calculate total price
     const cartItems = Array.isArray(data) ? data : data.cart || [];
