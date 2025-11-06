@@ -109,12 +109,12 @@ function CartPage() {
                 }),
             });
             if(response.status === 200){
-                showToast(`Proceeding to checkout! Total: $${totalWithTax.toFixed(2)}`, 'success');
+                showToast(`Proceeding to checkout! Total: ₹${totalWithTax.toFixed(2)}`, 'success');
                 setCartItems([]);
                 setTotalPrice(0);
             }
             else{
-                showToast(`Failed to checkout! Total: $${totalWithTax.toFixed(2)}`, 'error');
+                showToast(`Failed to checkout! Total: ₹${totalWithTax.toFixed(2)}`, 'error');
             }
         }
         catch(err){
@@ -163,7 +163,7 @@ function CartPage() {
                                     <h3>{item.productName || item.model}</h3>
                                     <p className="cart-item-description">{item.productDescription || item.brand}</p>
                                     <p className="cart-item-price">
-                                        ${ (item.productPrice ?? item.price ?? 0).toLocaleString(undefined, { minimumFractionDigits: 2 }) }
+                                        ₹{ (item.productPrice ?? item.price ?? 0).toLocaleString(undefined, { minimumFractionDigits: 2 }) }
                                     </p>
 
                                     <div className="quantity-control">
@@ -199,15 +199,15 @@ function CartPage() {
                         <h3>Order Summary</h3>
                         <div className="summary-row">
                             <span>Items ({cartItems.length})</span>
-                            <span>${totalPrice.toFixed(2)}</span>
+                            <span>₹{totalPrice.toFixed(2)}</span>
                         </div>
                         <div className="summary-row"><span>Shipping</span><span>Free</span></div>
-                        <div className="summary-row"><span>Tax</span><span>${(totalPrice * 0.08).toFixed(2)}</span></div>
-                        <div className="summary-row discount"><span>Discount</span><span>-${(totalPrice * 0.05).toFixed(2)}</span></div>
+                        <div className="summary-row"><span>Tax</span><span>₹{(totalPrice * 0.08).toFixed(2)}</span></div>
+                        <div className="summary-row discount"><span>Discount</span><span>-₹{(totalPrice * 0.05).toFixed(2)}</span></div>
                         <div className="summary-divider"></div>
                         <div className="summary-row total">
                             <span>Order Total</span>
-                            <span>${(totalPrice + totalPrice * 0.08 - totalPrice * 0.05).toFixed(2)}</span>
+                            <span>₹{(totalPrice + totalPrice * 0.08 - totalPrice * 0.05).toFixed(2)}</span>
                         </div>
                         <div className="delivery-info">
                             <span>Estimated delivery:</span>

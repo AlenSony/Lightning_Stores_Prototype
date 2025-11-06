@@ -133,14 +133,70 @@
     margin-bottom: 20px;
 }
 
+/* Section Header Styling */
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+}
+
 /* Section Title Styling */
 .section-title {
     text-align: left;
     font-size: 2.5rem;
     font-weight: 700;
     color: #1a237e;
-    margin-bottom: 2rem;
+    margin: 0;
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Company Filter Styling */
+.company-filter {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.filter-label {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #1a237e;
+    white-space: nowrap;
+}
+
+.company-select {
+    padding: 0.75rem 1.25rem;
+    font-size: 1rem;
+    font-weight: 500;
+    color: #1a237e;
+    background: rgba(255, 255, 255, 0.95);
+    border: 2px solid rgba(31, 117, 254, 0.3);
+    border-radius: 12px;
+    cursor: pointer;
+    outline: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    min-width: 180px;
+}
+
+.company-select:hover {
+    border-color: rgba(31, 117, 254, 0.5);
+    box-shadow: 0 4px 12px rgba(31, 117, 254, 0.2);
+    transform: translateY(-2px);
+}
+
+.company-select:focus {
+    border-color: #1F75FE;
+    box-shadow: 0 0 0 3px rgba(31, 117, 254, 0.2);
+}
+
+.company-select option {
+    padding: 0.5rem;
+    background: white;
+    color: #1a237e;
 }
 
 /* New Release Content Styling */
@@ -221,7 +277,7 @@
 
 /* Card styling - this matches the class used in ComponentCard.jsx */
 .phone-cards-container .phone-cards-grid .component_contrainer {
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: none;
     background: linear-gradient(145deg, #ffffff, #f0f0f0);
     border-radius: 16px;
     padding: 1.5rem;
@@ -239,12 +295,12 @@
 
 /* Card hover effects */
 .phone-cards-container .phone-cards-grid .component_contrainer:hover {
-    transform: translateY(-8px) scale(1.02);
+    transform: none;
     box-shadow: 
-        0 15px 30px rgba(0, 0, 0, 0.18),
-        0 5px 15px rgba(0, 0, 0, 0.1),
-        inset 0 1px 0 rgba(255, 255, 255, 0.9);
-    background: linear-gradient(145deg, #ffffff, #f5f5f5);
+        0 8px 20px rgba(0, 0, 0, 0.12),
+        0 2px 5px rgba(0, 0, 0, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    background: linear-gradient(145deg, #ffffff, #f0f0f0);
 }
 
 /* Subtle decorative element */
@@ -257,12 +313,12 @@
     height: 200%;
     background: radial-gradient(circle, rgba(31, 117, 254, 0.1) 0%, rgba(255, 255, 255, 0) 70%);
     opacity: 0;
-    transition: opacity 0.5s ease;
+    transition: none;
     pointer-events: none;
 }
 
 .phone-cards-container .phone-cards-grid .component_contrainer:hover::before {
-    opacity: 1;
+    opacity: 0;
 }
 
 /* Card image styling with fixed size */
@@ -276,16 +332,16 @@
     padding: 15px;
     border-radius: 12px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-    transition: transform 0.5s ease, box-shadow 0.3s ease;
+    transition: none;
 }
 
 .phone-cards-container .phone-cards-grid .component_contrainer:hover .component_header h2 {
-    color: #1a237e;
+    color: #222;
 }
 
 .phone-cards-container .phone-cards-grid .component_contrainer:hover img {
-    transform: scale(1.08) rotate(2deg);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    transform: none;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
 }
 
 /* Description visibility toggle */
@@ -293,7 +349,7 @@
     max-height: 0;
     opacity: 0;
     overflow: hidden;
-    transition: max-height 0.5s ease, opacity 0.5s ease;
+    transition: none;
     font-size: 0.9rem;
     line-height: 1.5;
     color: #333;
@@ -301,9 +357,9 @@
 }
 
 .phone-cards-container .phone-cards-grid .component_contrainer:hover .component_description {
-    max-height: 100px;
-    opacity: 1;
-    margin-top: 10px;
+    max-height: 0;
+    opacity: 0;
+    margin-top: 0;
 }
 
 /* Ensure RAM and storage are displayed in small font by default */
@@ -532,6 +588,27 @@
     
     .content-container .content {
         font-size: 1rem;
+    }
+    
+    /* Responsive filter styling */
+    .section-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .company-filter {
+        width: 100%;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .company-select {
+        width: 100%;
+        min-width: unset;
+    }
+    
+    .section-title {
+        font-size: 1.8rem;
     }
 }
 

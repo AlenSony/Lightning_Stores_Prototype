@@ -63,7 +63,7 @@ function OrderPage() {
           {orders.map((order) => (
             <div key={order.orderId} className="order-card">
               <div className="order-details">
-                <p><strong>Total Price:</strong> ${order.totalPrice.toFixed(2)}</p>
+                <p><strong>Total Price:</strong> ₹{order.totalPrice.toFixed(2)}</p>
                 <p><strong>Payment Status:</strong> {order.paymentStatus}</p>
               </div>
               <div className="order-items-list">
@@ -84,7 +84,7 @@ function OrderPage() {
                       <h4>{device.name}</h4>
                       <p>{device.company} - {device.category}</p>
                       <p>Qty: {device.quantity}</p>
-                      <p className="device-price">${device.expectedPrice.toFixed(2)}</p>
+                      <p className="device-price">₹{device.expectedPrice.toFixed(2)}</p>
                     </div>
                   </div>
                 ))}

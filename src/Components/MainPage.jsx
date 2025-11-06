@@ -8,6 +8,7 @@ function MainPage() {
     const [currentSlide, setCurrentSlide] = useState(0);
     const [devices, setDevices] = useState([]);
     const [loadingDevices, setLoadingDevices] = useState(true);
+    const [selectedCompany, setSelectedCompany] = useState('all');
     const totalSlides = 3;
 
     useEffect(() => {
@@ -60,6 +61,103 @@ function MainPage() {
             newReleasesElement.scrollIntoView({ behavior: 'smooth' });
         }
     };
+
+    // Predefined list of major companies
+    const predefinedCompanies = [
+        'Apple',
+        'Samsung',
+        'Vivo',
+        'iQOO',
+        'OnePlus',
+        'Xiaomi',
+        'Redmi',
+        'Realme',
+        'Oppo',
+        'Nothing',
+        'Google',
+        'Motorola',
+        'Nokia',
+        'Sony',
+        'Asus',
+        'Honor'
+    ];
+
+    // Get unique companies from devices and merge with predefined list
+    const deviceCompanies = new Set(devices.map(d => d.company).filter(Boolean));
+    const allCompanies = ['all', ...predefinedCompanies, ...deviceCompanies].filter((value, index, self) => 
+        self.indexOf(value) === index
+    ).sort((a, b) => {
+        if (a === 'all') return -1;
+        if (b === 'all') return 1;
+        return a.localeCompare(b);
+    });
+
+    // Brand-specific keywords mapping for better matching
+    const brandKeywords = {
+        'apple': ['iphone', 'ipad', 'ipod', 'macbook', 'imac', 'apple'],
+        'samsung': ['galaxy', 'samsung', 'note', 's series', 'z fold', 'z flip'],
+        'vivo': ['vivo', 'x series', 'y series', 'v series'],
+        'iqoo': ['iqoo', 'neo', 'z series'],
+        'oneplus': ['oneplus', 'nord'],
+        'xiaomi': ['xiaomi', 'mi ', 'redmi note', 'poco'],
+        'redmi': ['redmi', 'note'],
+        'realme': ['realme', 'gt', 'narzo'],
+        'oppo': ['oppo', 'reno', 'find x'],
+        'nothing': ['nothing', 'phone'],
+        'google': ['pixel', 'google'],
+        'motorola': ['motorola', 'moto', 'edge', 'razr'],
+        'nokia': ['nokia'],
+        'sony': ['sony', 'xperia'],
+        'asus': ['asus', 'zenfone', 'rog phone'],
+        'honor': ['honor', 'magic', 'view']
+    };
+
+    // Helper function to check if device matches company (case-insensitive, checks both company field and device name)
+    const deviceMatchesCompany = (device, companyName) => {
+        if (!companyName || companyName === 'all') return true;
+        
+        const companyLower = companyName.toLowerCase();
+        const deviceCompany = (device.company || '').toLowerCase();
+        const deviceName = (device.name || '').toLowerCase();
+        
+        // First check exact match in company field
+        if (deviceCompany === companyLower || deviceCompany.includes(companyLower)) {
+            return true;
+        }
+        
+        // Check if company name appears in device name
+        if (deviceName.includes(companyLower)) {
+            return true;
+        }
+        
+        // Check brand-specific keywords
+        const keywords = brandKeywords[companyLower] || [];
+        for (const keyword of keywords) {
+            if (deviceName.includes(keyword) || deviceCompany.includes(keyword)) {
+                return true;
+            }
+        }
+        
+        return false;
+    };
+
+    // Filter and sort devices based on selected company
+    const filteredDevices = (selectedCompany === 'all' 
+        ? devices 
+        : devices.filter(d => deviceMatchesCompany(d, selectedCompany))
+    ).sort((a, b) => {
+        // Sort by company name first (alphabetically)
+        const companyA = (a.company || '').toLowerCase();
+        const companyB = (b.company || '').toLowerCase();
+        
+        if (companyA < companyB) return -1;
+        if (companyA > companyB) return 1;
+        
+        // If same company, sort by device name
+        const nameA = (a.name || '').toLowerCase();
+        const nameB = (b.name || '').toLowerCase();
+        return nameA.localeCompare(nameB);
+    });
 
     const slides = [
         {
@@ -152,12 +250,31 @@ function MainPage() {
             
             {/* Phone Cards Section */}
             <div className="phone-cards-container">
-                <h2 className="section-title">New Releases</h2>
+                <div className="section-header">
+                    <h2 className="section-title">New Releases</h2>
+                    {!loadingDevices && devices.length > 0 && (
+                        <div className="company-filter">
+                            <label htmlFor="company-select" className="filter-label">Filter by Company:</label>
+                            <select 
+                                id="company-select"
+                                className="company-select"
+                                value={selectedCompany}
+                                onChange={(e) => setSelectedCompany(e.target.value)}
+                            >
+                                {allCompanies.map(company => (
+                                    <option key={company} value={company}>
+                                        {company === 'all' ? 'All Companies' : company}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                    )}
+                </div>
                 {loadingDevices ? (
                     <div style={{ color: 'white', padding: '16px' }}>Loading products...</div>
                 ) : (
                     <div className="phone-cards-grid">
-                        {devices.map((d, index) => (
+                        {filteredDevices.map((d, index) => (
                             <CardComponent
                                 key={d._id || index}
                                 _id={d._id}
@@ -170,8 +287,12 @@ function MainPage() {
                                 image={d.image_url || d.image}
                             />
                         ))}
-                        {devices.length === 0 && (
-                            <div style={{ color: 'white', padding: '16px' }}>No products found.</div>
+                        {filteredDevices.length === 0 && (
+                            <div style={{ color: 'white', padding: '16px' }}>
+                                {devices.length === 0 
+                                    ? 'No products found.' 
+                                    : `No products found for ${selectedCompany === 'all' ? 'selected company' : selectedCompany}.`}
+                            </div>
                         )}
                     </div>
                 )}

@@ -97,10 +97,10 @@ function CardComponent ({_id, name, company, price, description, ram, storage, i
                     <p>{company}</p>
                 </div>
                 <div className="component_price">
-                    <p>${price}</p>
+                    <p>₹{price}</p>
                 </div>
                 <div className="component_description">
-                    <p>{description}</p>
+                    <p>{description || 'No description available'}</p>
                 </div>
                 <div className="component_specs">
                     <p>RAM: {ram}</p>

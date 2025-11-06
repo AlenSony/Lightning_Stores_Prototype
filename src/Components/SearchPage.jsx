@@ -125,7 +125,7 @@ function SearchPage() {
                                 <div className="phone-info">
                                     <h3 onClick={() => handlePhoneClick(phone)}>{phone.name}</h3>
                                     <p className="phone-company">{phone.company}</p>
-                                    <p className="phone-price">${phone.expected_price ? phone.expected_price.toLocaleString(undefined, { minimumFractionDigits: 2 }) : '0.00'}</p>
+                                    <p className="phone-price">₹{phone.expected_price ? phone.expected_price.toLocaleString(undefined, { minimumFractionDigits: 2 }) : '0.00'}</p>
                                     <p className="phone-description">{phone.description}</p>
                                     <button 
                                         className="add-to-cart-btn"

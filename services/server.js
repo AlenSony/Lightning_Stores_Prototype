@@ -223,7 +223,20 @@ async function startServer() {
 
     app.get("/api/product", AuthMiddleware, async (req, res) => {
       try {
-        const products = await Device.find({});
+        const { company } = req.query;
+        
+        // If company filter is provided, filter by company (case-insensitive)
+        let query = {};
+        if (company && company !== 'all') {
+          query = {
+            $or: [
+              { company: { $regex: company, $options: "i" } },
+              { name: { $regex: company, $options: "i" } }
+            ]
+          };
+        }
+        
+        const products = await Device.find(query);
         res.status(200).json(products);
       } catch (err) {
         res.status(500).json({ message: "Internal server error" });

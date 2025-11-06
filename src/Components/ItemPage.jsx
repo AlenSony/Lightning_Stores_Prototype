@@ -85,7 +85,7 @@ function ItemPage() {
               </div>
               
               <div className="item-price">
-                <h2>${item.price}</h2>
+                <h2>₹{item.price}</h2>
               </div>
               
               <div className="item-description">
