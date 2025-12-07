@@ -11,6 +11,11 @@ function MainPage() {
     const [selectedCompany, setSelectedCompany] = useState('all');
     const totalSlides = 3;
 
+    // State for company slider
+    const [currentCompanySlide, setCurrentCompanySlide] = useState(0);
+    // State for laptop company slider
+    const [currentLaptopCompanySlide, setCurrentLaptopCompanySlide] = useState(0);
+
     useEffect(() => {
         const interval = setInterval(() => {
             setCurrentSlide((prevSlide) => (prevSlide + 1) % totalSlides);
@@ -82,9 +87,29 @@ function MainPage() {
         'Honor'
     ];
 
-    // Get unique companies from devices and merge with predefined list
-    const deviceCompanies = new Set(devices.map(d => d.company).filter(Boolean));
+    // Filter devices into phones and laptops
+    // Assuming phones don't have category 'Laptop' or 'laptop'
+    const phoneDevices = devices.filter(d => !d.category || (d.category !== 'Laptop' && d.category !== 'laptop'));
+    const laptopDevices = devices.filter(d => d.category === 'Laptop' || d.category === 'laptop');
+
+    // Get unique companies from phone devices and merge with predefined list
+    const deviceCompanies = new Set(phoneDevices.map(d => d.company).filter(Boolean));
     const allCompanies = ['all', ...predefinedCompanies, ...deviceCompanies].filter((value, index, self) => 
+        self.indexOf(value) === index
+    ).sort((a, b) => {
+        if (a === 'all') return -1;
+        if (b === 'all') return 1;
+        return a.localeCompare(b);
+    });
+
+    // Predefined list of major laptop companies
+    const predefinedLaptopCompanies = [
+        'Apple', 'Dell', 'HP', 'Lenovo', 'Asus', 'Acer', 'Microsoft', 'Razer', 'MSI', 'Samsung', 'Alienware'
+    ];
+
+    // Get unique companies from laptop devices
+    const laptopDeviceCompanies = new Set(laptopDevices.map(d => d.company).filter(Boolean));
+    const allLaptopCompanies = ['all', ...predefinedLaptopCompanies, ...laptopDeviceCompanies].filter((value, index, self) => 
         self.indexOf(value) === index
     ).sort((a, b) => {
         if (a === 'all') return -1;
@@ -109,7 +134,14 @@ function MainPage() {
         'nokia': ['nokia'],
         'sony': ['sony', 'xperia'],
         'asus': ['asus', 'zenfone', 'rog phone'],
-        'honor': ['honor', 'magic', 'view']
+        'honor': ['honor', 'magic', 'view'],
+        'dell': ['dell', 'xps', 'inspiron', 'latitude', 'alienware'],
+        'hp': ['hp', 'pavilion', 'spectre', 'envy', 'omen'],
+        'lenovo': ['lenovo', 'thinkpad', 'ideapad', 'yoga', 'legion'],
+        'acer': ['acer', 'aspire', 'predator', 'swift'],
+        'microsoft': ['surface'],
+        'razer': ['razer', 'blade'],
+        'msi': ['msi', 'titan', 'raider', 'stealth']
     };
 
     // Helper function to check if device matches company (case-insensitive, checks both company field and device name)
@@ -141,23 +173,52 @@ function MainPage() {
         return false;
     };
 
-    // Filter and sort devices based on selected company
-    const filteredDevices = (selectedCompany === 'all' 
-        ? devices 
-        : devices.filter(d => deviceMatchesCompany(d, selectedCompany))
-    ).sort((a, b) => {
-        // Sort by company name first (alphabetically)
-        const companyA = (a.company || '').toLowerCase();
-        const companyB = (b.company || '').toLowerCase();
-        
-        if (companyA < companyB) return -1;
-        if (companyA > companyB) return 1;
-        
-        // If same company, sort by device name
-        const nameA = (a.name || '').toLowerCase();
-        const nameB = (b.name || '').toLowerCase();
-        return nameA.localeCompare(nameB);
-    });
+    // Prepare company slides (Phones)
+    const companySlides = allCompanies
+        .filter(company => company !== 'all')
+        .map(company => {
+            const companyDevices = phoneDevices.filter(d => deviceMatchesCompany(d, company));
+            return {
+                company,
+                devices: companyDevices
+            };
+        });
+        // .filter(group => group.devices.length > 0); // Keep all companies to show "Not Available" if empty
+
+    // Prepare laptop slides
+    const laptopSlides = allLaptopCompanies
+        .filter(company => company !== 'all')
+        .map(company => {
+            const companyDevices = laptopDevices.filter(d => deviceMatchesCompany(d, company));
+            return {
+                company,
+                devices: companyDevices
+            };
+        });
+
+    const handleCompanyDotClick = (index) => {
+        setCurrentCompanySlide(index);
+    };
+
+    const handleCompanyNext = () => {
+        setCurrentCompanySlide((prev) => (prev + 1) % companySlides.length);
+    };
+
+    const handleCompanyPrev = () => {
+        setCurrentCompanySlide((prev) => (prev - 1 + companySlides.length) % companySlides.length);
+    };
+
+    const handleLaptopCompanyDotClick = (index) => {
+        setCurrentLaptopCompanySlide(index);
+    };
+
+    const handleLaptopCompanyNext = () => {
+        setCurrentLaptopCompanySlide((prev) => (prev + 1) % laptopSlides.length);
+    };
+
+    const handleLaptopCompanyPrev = () => {
+        setCurrentLaptopCompanySlide((prev) => (prev - 1 + laptopSlides.length) % laptopSlides.length);
+    };
 
     const slides = [
         {
@@ -227,6 +288,7 @@ function MainPage() {
                                             <li key={itemIndex}>{item}</li>
                                         ))}
                                     </ul>
+                                    <button className="view-details-btn">View Details</button>
                                 </div>
                             </div>
                             <div className="image-container">
@@ -248,55 +310,144 @@ function MainPage() {
                 </div>
             </div>
             
-            {/* Phone Cards Section */}
+            {/* Phone Cards Section - Company Slider */}
             <div className="phone-cards-container">
                 <div className="section-header">
-                    <h2 className="section-title">New Releases</h2>
-                    {!loadingDevices && devices.length > 0 && (
-                        <div className="company-filter">
-                            <label htmlFor="company-select" className="filter-label">Filter by Company:</label>
-                            <select 
-                                id="company-select"
-                                className="company-select"
-                                value={selectedCompany}
-                                onChange={(e) => setSelectedCompany(e.target.value)}
-                            >
-                                {allCompanies.map(company => (
-                                    <option key={company} value={company}>
-                                        {company === 'all' ? 'All Companies' : company}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-                    )}
+                    <h2 className="section-title">Browse Smartphones</h2>
                 </div>
+                
                 {loadingDevices ? (
                     <div style={{ color: 'white', padding: '16px' }}>Loading products...</div>
-                ) : (
-                    <div className="phone-cards-grid">
-                        {filteredDevices.map((d, index) => (
-                            <CardComponent
-                                key={d._id || index}
-                                _id={d._id}
-                                name={d.name}
-                                company={d.company}
-                                price={Number(d.expected_price)}
-                                description={d.description}
-                                ram={d.ram}
-                                storage={d.storage}
-                                image={d.image_url || d.image}
-                            />
-                        ))}
-                        {filteredDevices.length === 0 && (
-                            <div style={{ color: 'white', padding: '16px' }}>
-                                {devices.length === 0 
-                                    ? 'No products found.' 
-                                    : `No products found for ${selectedCompany === 'all' ? 'selected company' : selectedCompany}.`}
+                ) : companySlides.length > 0 ? (
+                    <div className="company-slider-container">
+                        {companySlides.map((slide, index) => (
+                            <div 
+                                key={slide.company} 
+                                className={`company-slide ${currentCompanySlide === index ? 'active' : ''}`}
+                            >
+                                <div className="company-title-wrapper">
+                                    <h3 className="company-slide-title">{slide.company}</h3>
+                                    <div className="slide-navigation">
+                                        <button className="nav-btn prev" onClick={handleCompanyPrev}>❮</button>
+                                        <button className="nav-btn next" onClick={handleCompanyNext}>❯</button>
+                                    </div>
+                                </div>
+                                
+                                {slide.devices.length > 0 ? (
+                                    <div className="phone-cards-grid">
+                                        {slide.devices.slice(0, 8).map((d, deviceIndex) => (
+                                            <CardComponent
+                                                key={d._id || deviceIndex}
+                                                _id={d._id}
+                                                name={d.name}
+                                                company={d.company}
+                                                price={Number(d.expected_price)}
+                                                description={d.description}
+                                                ram={d.ram}
+                                                storage={d.storage}
+                                                image={d.image_url || d.image}
+                                            />
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="no-products-panel">
+                                        <div className="no-products-content">
+                                            <h3>Coming Soon</h3>
+                                            <p>We are currently stocking up on {slide.company} products.</p>
+                                            <p>Stay tuned for the latest releases!</p>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
-                        )}
+                        ))}
+                        
+                        <div className="company-slider-dots">
+                            {companySlides.map((_, index) => (
+                                <span 
+                                    key={index} 
+                                    className={`company-dot ${currentCompanySlide === index ? 'active' : ''}`}
+                                    onClick={() => handleCompanyDotClick(index)}
+                                    title={companySlides[index].company}
+                                ></span>
+                            ))}
+                        </div>
+                    </div>
+                ) : (
+                    <div style={{ color: 'white', padding: '16px' }}>
+                        No products found.
                     </div>
                 )}
             </div>
+
+            {/* Laptop Cards Section - Company Slider */}
+            <div className="laptop-cards-container">
+                <div className="section-header">
+                    <h2 className="section-title">Browse Laptops</h2>
+                </div>
+                
+                {loadingDevices ? (
+                    <div style={{ color: 'white', padding: '16px' }}>Loading products...</div>
+                ) : laptopSlides.length > 0 ? (
+                    <div className="company-slider-container">
+                        {laptopSlides.map((slide, index) => (
+                            <div 
+                                key={slide.company} 
+                                className={`company-slide ${currentLaptopCompanySlide === index ? 'active' : ''}`}
+                            >
+                                <div className="company-title-wrapper">
+                                    <h3 className="company-slide-title">{slide.company}</h3>
+                                    <div className="slide-navigation">
+                                        <button className="nav-btn prev" onClick={handleLaptopCompanyPrev}>❮</button>
+                                        <button className="nav-btn next" onClick={handleLaptopCompanyNext}>❯</button>
+                                    </div>
+                                </div>
+                                
+                                {slide.devices.length > 0 ? (
+                                    <div className="laptop-cards-grid">
+                                        {slide.devices.slice(0, 8).map((d, deviceIndex) => (
+                                            <CardComponent
+                                                key={d._id || deviceIndex}
+                                                _id={d._id}
+                                                name={d.name}
+                                                company={d.company}
+                                                price={Number(d.expected_price)}
+                                                description={d.description}
+                                                ram={d.ram}
+                                                storage={d.storage}
+                                                image={d.image_url || d.image}
+                                            />
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="no-products-panel">
+                                        <div className="no-products-content">
+                                            <h3>Coming Soon</h3>
+                                            <p>We are currently stocking up on {slide.company} laptops.</p>
+                                            <p>Stay tuned for the latest releases!</p>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        ))}
+                        
+                        <div className="company-slider-dots">
+                            {laptopSlides.map((_, index) => (
+                                <span 
+                                    key={index} 
+                                    className={`company-dot ${currentLaptopCompanySlide === index ? 'active' : ''}`}
+                                    onClick={() => handleLaptopCompanyDotClick(index)}
+                                    title={laptopSlides[index].company}
+                                ></span>
+                            ))}
+                        </div>
+                    </div>
+                ) : (
+                    <div style={{ color: 'white', padding: '16px' }}>
+                        No laptops found.
+                    </div>
+                )}
+            </div>
+            
     </div>
     )
 }

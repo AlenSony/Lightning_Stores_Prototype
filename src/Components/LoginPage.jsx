@@ -138,7 +138,7 @@ function LoginPage() {
               marginBottom: '10px',
               fontWeight: 'bold'
             }}>
-              Lightning Stores
+              Novara
             </h1>
             <p style={{ 
               color: 'rgba(32, 32, 32, 0.7)', 

@@ -1,8 +1,8 @@
 import './Navbar.css';
 
-import { useState, useEffect } from 'react';
-import { getCart } from '../utils/cartUtils.js';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { getCart } from '../utils/cartUtils.js';
 
 function NavBar() {
     const [searchQuery, setSearchQuery] = useState('');
@@ -64,7 +64,7 @@ function NavBar() {
 
     return(
         <div className="navbar">
-            <img src="/logo.svg" alt="Logo" />
+            <img src="/logo.png" alt="Logo" />
             <div className="search-bar">
                 <div className="search-container">
                     <form onSubmit={handleSearch}>

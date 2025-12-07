@@ -7,8 +7,8 @@ function LandingPage({ onExploreClick }) {
   return (
     <>
       {/* Aurora动态背景 */}
-      <div className="landing-page-container">
-        <div className="container">
+      <div className="landing-hero-card">
+        <div className="landing-content-wrapper">
         {/* 标题部分 */}
           <div className="title">
             <GlitchText
@@ -17,7 +17,7 @@ function LandingPage({ onExploreClick }) {
               enableOnHover={true}
               className='custom-class'
             >
-              LIGHTNING
+              NOVARA 
             </GlitchText>
           </div>
         
@@ -29,7 +29,7 @@ function LandingPage({ onExploreClick }) {
             scrambleChars=".:"
             radius={100}
           >
-            Step into a world where technology meets convenience. At LIGHTNING, we bring you the latest and most reliable electronic gadgets and accessories, all in one place. From high-performance laptops, smartphones, and tablets to smart home devices, wearables, and audio gear, every product is carefully curated to deliver quality, innovation, and value.
+            Novara is where innovation meets elegance. A modern tech store crafted for those who appreciate both performance and aesthetics, Novara curates cutting-edge gadgets, smart devices, and digital essentials with a minimalist, futuristic touch. Every product reflects precision, quality, and forward-thinking design—because technology should not only function brilliantly, but feel inspiring to use.
           </ScrambledText>
           
           {/* Call to Action Button */}
