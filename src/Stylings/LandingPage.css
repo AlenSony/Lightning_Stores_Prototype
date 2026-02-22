@@ -4,7 +4,8 @@
   box-sizing: border-box;
 }
 
-body, html {
+body,
+html {
   margin: 0;
   padding: 0;
   width: 100%;
@@ -25,15 +26,14 @@ body, html {
   padding: 4rem;
   border-radius: 30px;
   border: 1px solid rgba(255, 255, 255, 0.4);
-  box-shadow: 
-      0 20px 50px rgba(0, 0, 0, 0.1),
-      0 0 0 1px rgba(255, 255, 255, 0.2) inset;
+  box-shadow:
+    0 20px 50px rgba(0, 0, 0, 0.1),
+    0 0 0 1px rgba(255, 255, 255, 0.2) inset;
   background: rgba(255, 255, 255, 0.25);
   backdrop-filter: blur(25px);
   position: relative;
   overflow: hidden;
   display: flex;
-  flex-direction: column;
   justify-content: center;
   align-items: center;
 }
@@ -61,6 +61,8 @@ body, html {
   align-items: center;
   text-align: center;
   padding: 0;
+  display: flex;
+  flex-direction: row;
 }
 
 .title {
@@ -99,11 +101,11 @@ body, html {
   .title {
     margin-bottom: 1.5rem;
   }
-  
+
   .glitch {
     font-size: clamp(1.5rem, 8vw, 5rem) !important;
   }
-  
+
   .text-block {
     font-size: clamp(12px, 5vw, 14px) !important;
   }
@@ -164,8 +166,15 @@ body, html {
 }
 
 @keyframes gradient-shift {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
+  0% {
+    background-position: 0% 50%;
+  }
 
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
+}

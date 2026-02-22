@@ -281,9 +281,9 @@
     max-width: 1400px;
     width: 92%;
     border-radius: 24px;
-    border: 1px solid rgba(31, 117, 254, 0.3);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15), 0 0 20px rgba(31, 117, 254, 0.1);
-    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 10px 30px rgba(255, 255, 255, 0.15), 0 0 20px rgba(249, 249, 249, 0.1);
+    background: linear-gradient(to right, rgba(255, 255, 255, 0.464),rgba(255, 255, 255, 0.07));
     backdrop-filter: blur(10px);
     overflow: visible;
     z-index: 1;
@@ -404,9 +404,9 @@
     max-width: 1400px;
     width: 92%;
     border-radius: 24px;
-    border: 1px solid rgba(31, 117, 254, 0.3);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15), 0 0 20px rgba(31, 117, 254, 0.1);
-    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15), 0 0 20px rgba(251, 251, 251, 0.1);
+    background: linear-gradient(to right, rgba(255, 255, 255, 0.464), rgba(255, 255, 255, 0.047));
     backdrop-filter: blur(10px);
     overflow: visible;
     z-index: 1;

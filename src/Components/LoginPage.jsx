@@ -136,7 +136,7 @@ function LoginPage() {
               color: 'rgba(32, 32, 32, 1)', 
               fontSize: '32px', 
               marginBottom: '10px',
-              fontWeight: 'bold'
+              fontFamily: 'fantasy'
             }}>
               Novara
             </h1>
@@ -318,7 +318,7 @@ function LoginPage() {
 
           {/* Footer */}
           <div style={{
-            color: 'rgba(255, 255, 255, 0.6)',
+            color: 'rgba(0, 0, 0, 0.6)',
             fontSize: '14px'
           }}>
             {isLogin ? (
@@ -329,8 +329,8 @@ function LoginPage() {
                   style={{
                     background: 'none',
                     border: 'none',
-                    color: 'white',
-                    textDecoration: 'underline',
+                    color: 'rgba(0, 0, 0, 0.6)',
+                    textDecoration: 'none',
                     cursor: 'pointer',
                     fontSize: '14px'
                   }}
@@ -346,8 +346,8 @@ function LoginPage() {
                   style={{
                     background: 'none',
                     border: 'none',
-                    color: 'white',
-                    textDecoration: 'underline',
+                    color: 'rgba(0, 0, 0, 0.6)',
+                    textDecoration: 'none',
                     cursor: 'pointer',
                     fontSize: '14px'
                   }}

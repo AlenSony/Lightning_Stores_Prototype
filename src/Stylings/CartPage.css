@@ -319,7 +319,7 @@
         padding: 1.2rem;
     }
     
-    .cart-item-image {
+    .cart-item-image img{
         width: 80px;
         height: 80px;
     }

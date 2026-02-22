@@ -14,25 +14,29 @@
     margin-left: 2rem;
     margin-right: 2rem;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .navbar img {
     width: 75px;
     height: 55px;
-    
+
 }
 
 .navbar .search-bar {
     display: flex;
     align-items: center;
     border: none;
-    width:auto;
+    width: auto;
     position: relative;
 }
 
 .search-bar input {
     padding: 0.9rem 1rem;
-    width:fit-content;
+    width: fit-content;
     border: none;
     border-radius: 20px;
     margin-right: 0.5rem;
@@ -175,8 +179,15 @@
 
 /* Add animation to cart button when item is added */
 @keyframes cartBounce {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.2); }
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.2);
+    }
 }
 
 .cart-button.add-animation {
