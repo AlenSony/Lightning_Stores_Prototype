@@ -22,6 +22,10 @@ function createDeviceSchema() {
       type: String,
       required: true,
     },
+    variants: {
+      type: Array,
+      required: true,
+    },
     expected_price: {
       type: Number,
       required: true,

@@ -224,7 +224,7 @@ async function startServer() {
     app.get("/api/product", AuthMiddleware, async (req, res) => {
       try {
         const { company } = req.query;
-        
+
         // If company filter is provided, filter by company (case-insensitive)
         let query = {};
         if (company && company !== 'all') {
@@ -235,10 +235,76 @@ async function startServer() {
             ]
           };
         }
-        
+
         const products = await Device.find(query);
         res.status(200).json(products);
       } catch (err) {
+        res.status(500).json({ message: "Internal server error" });
+      }
+    });
+
+    // GET /api/product/variants — fetch sibling variants for a product
+    // Query params: id (required), company (required)
+    //
+    // Convention: variant products share the same base model name, with
+    // the specific variant described in parentheses, e.g.:
+    //   "iPhone 16 Pro (256GB, Black)"
+    //   "iPhone 16 Pro (512GB, Natural Titanium)"
+    // The base name is everything BEFORE the first '('.
+    // Products without '(' in their name are treated as standalone (no siblings).
+    app.get("/api/product/variants", AuthMiddleware, async (req, res) => {
+      try {
+        const { id, company } = req.query;
+        if (!id || !company) {
+          return res.status(400).json({ message: "id and company are required" });
+        }
+
+        // Fetch the reference product
+        const reference = await Device.findById(id);
+        if (!reference) {
+          return res.status(404).json({ message: "Product not found" });
+        }
+
+        // Extract base model name: everything before the first '('
+        const parenIndex = reference.name.indexOf('(');
+        if (parenIndex === -1) {
+          // No parenthesis → no siblings; return just this product
+          return res.status(200).json([reference]);
+        }
+
+        const baseName = reference.name.slice(0, parenIndex).trim();
+        if (!baseName) {
+          return res.status(200).json([reference]);
+        }
+
+        // Escape special regex chars in the base name
+        const escapedBase = baseName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+        // Find all products from the same company whose name starts with baseName
+        // followed by a space or '(' so we don't accidentally match prefixes
+        const siblings = await Device.find({
+          company: { $regex: `^${company.trim()}$`, $options: 'i' },
+          name: { $regex: `^${escapedBase}\\s*\\(`, $options: 'i' },
+        });
+
+        res.status(200).json(siblings);
+      } catch (err) {
+        console.error("Error in /api/product/variants:", err);
+        res.status(500).json({ message: "Internal server error" });
+      }
+    });
+
+
+    // GET /api/product/:id — fetch a single product by its MongoDB _id
+    app.get("/api/product/:id", AuthMiddleware, async (req, res) => {
+      try {
+        const product = await Device.findById(req.params.id);
+        if (!product) {
+          return res.status(404).json({ message: "Product not found" });
+        }
+        res.status(200).json(product);
+      } catch (err) {
+        console.error("Error in /api/product/:id:", err);
         res.status(500).json({ message: "Internal server error" });
       }
     });
@@ -508,7 +574,153 @@ async function startServer() {
       }
     });
 
+    // POST /api/admin/product — add a new product (admin only)
+    app.post("/api/admin/product", AuthMiddleware, async (req, res) => {
+      try {
+        const requestingUser = await User.findById(req.user.userId);
+        if (!requestingUser || requestingUser.role !== "admin") {
+          return res.status(403).json({ message: "Admin access required" });
+        }
+
+        const {
+          name,
+          company,
+          description,
+          ram,
+          storage,
+          expected_price,
+          actual_price,
+          stock,
+          category,
+          image_url,
+          variant,
+        } = req.body;
+
+        // Only the three truly essential fields are hard-required
+        if (!name || !company || !expected_price) {
+          return res.status(400).json({ message: "name, company, and expected_price are required" });
+        }
+
+        // Build the stored name
+        const trimmedVariant = (variant || "").trim();
+        const storedName = trimmedVariant
+          ? `${name.trim()} (${trimmedVariant})`
+          : name.trim();
+
+        const newDevice = new Device({
+          name: storedName,
+          company: company.trim(),
+          description: (description || "").trim() || "No description provided",
+          ram: (ram || "").trim() || "N/A",
+          storage: (storage || "").trim() || "N/A",
+          expected_price: parseFloat(expected_price),
+          actual_price: String(parseFloat(actual_price || expected_price)),
+          stock: String(parseInt(stock, 10) || 100),
+          category: (category || "Smartphone").trim(),
+          image_url: (image_url || "").trim() || "/placeholder.jpg",
+          variants: [],
+        });
+
+        await newDevice.save();
+        res.status(201).json({ message: "Product added successfully", product: newDevice });
+      } catch (err) {
+        console.error("Error in POST /api/admin/product:", err);
+        res.status(500).json({ message: "Internal server error", error: err.message });
+      }
+    });
+
+    // GET /api/admin/products — list all products (admin only)
+    app.get("/api/admin/products", AuthMiddleware, async (req, res) => {
+      try {
+        const requestingUser = await User.findById(req.user.userId);
+        if (!requestingUser || requestingUser.role !== "admin")
+          return res.status(403).json({ message: "Admin access required" });
+        const products = await Device.find({}).sort({ createdAt: -1 });
+        res.status(200).json(products);
+      } catch (err) {
+        res.status(500).json({ message: "Internal server error", error: err.message });
+      }
+    });
+
+    // PUT /api/admin/product/:id — update a product (admin only)
+    app.put("/api/admin/product/:id", AuthMiddleware, async (req, res) => {
+      try {
+        const requestingUser = await User.findById(req.user.userId);
+        if (!requestingUser || requestingUser.role !== "admin")
+          return res.status(403).json({ message: "Admin access required" });
+
+        const { name, company, description, ram, storage, expected_price, actual_price, stock, category, image_url } = req.body;
+        const updated = await Device.findByIdAndUpdate(
+          req.params.id,
+          {
+            name,
+            company,
+            description: description || "No description provided",
+            ram: ram || "N/A",
+            storage: storage || "N/A",
+            expected_price: parseFloat(expected_price),
+            actual_price: String(parseFloat(actual_price || expected_price)),
+            stock: String(parseInt(stock, 10)),
+            category,
+            image_url: image_url || "/placeholder.jpg",
+          },
+          { new: true }   // no runValidators — avoids re-checking unrelated required fields
+        );
+        if (!updated) return res.status(404).json({ message: "Product not found" });
+        res.status(200).json({ message: "Product updated successfully", product: updated });
+      } catch (err) {
+        res.status(500).json({ message: "Internal server error", error: err.message });
+      }
+    });
+
+    // DELETE /api/admin/product/:id — delete a product (admin only)
+    app.delete("/api/admin/product/:id", AuthMiddleware, async (req, res) => {
+      try {
+        const requestingUser = await User.findById(req.user.userId);
+        if (!requestingUser || requestingUser.role !== "admin")
+          return res.status(403).json({ message: "Admin access required" });
+        const deleted = await Device.findByIdAndDelete(req.params.id);
+        if (!deleted) return res.status(404).json({ message: "Product not found" });
+        res.status(200).json({ message: "Product deleted successfully" });
+      } catch (err) {
+        res.status(500).json({ message: "Internal server error", error: err.message });
+      }
+    });
+
+    // GET /api/admin/users — list all admin users (admin only)
+    app.get("/api/admin/users", AuthMiddleware, async (req, res) => {
+      try {
+        const requestingUser = await User.findById(req.user.userId);
+        if (!requestingUser || requestingUser.role !== "admin")
+          return res.status(403).json({ message: "Admin access required" });
+        const admins = await User.find({ role: "admin" }).select("-password");
+        res.status(200).json(admins);
+      } catch (err) {
+        res.status(500).json({ message: "Internal server error", error: err.message });
+      }
+    });
+
+    // PATCH /api/admin/revoke-admin/:id — demote admin back to user
+    app.patch("/api/admin/revoke-admin/:id", AuthMiddleware, async (req, res) => {
+      try {
+        const requestingUser = await User.findById(req.user.userId);
+        if (!requestingUser || requestingUser.role !== "admin")
+          return res.status(403).json({ message: "Admin access required" });
+
+        if (req.params.id === String(requestingUser._id))
+          return res.status(400).json({ message: "Cannot revoke your own admin access" });
+
+        const target = await User.findByIdAndUpdate(req.params.id, { role: "user" }, { new: true });
+        if (!target) return res.status(404).json({ message: "User not found" });
+        res.status(200).json({ message: `${target.name} has been demoted to user` });
+      } catch (err) {
+        res.status(500).json({ message: "Internal server error", error: err.message });
+      }
+    });
+
     app.post("/api/order/buy_now", AuthMiddleware, async (req, res) => {
+
+
       try {
         const { itemId, quantity } = req.body;
         const userId = req.user.userId || req.user.id; // safer extraction
@@ -579,13 +791,32 @@ async function startServer() {
       } catch (err) {
         console.error("Checkout error:", err);
         res.status(500).json({
-          message: "Internal server error",
           error: err.message,
         });
       }
     });
-  } catch (err) {}
+
+    // PATCH /api/order/:id/pay — mark an order as paid
+    app.patch("/api/order/:id/pay", AuthMiddleware, async (req, res) => {
+      try {
+        const userId = req.user.userId;
+        const order = await Order.findById(req.params.id);
+        if (!order) return res.status(404).json({ message: "Order not found" });
+        if (String(order.user_id) !== String(userId))
+          return res.status(403).json({ message: "Not your order" });
+        if (order.payment_status === "paid")
+          return res.status(400).json({ message: "Order already paid" });
+        order.payment_status = "paid";
+        await order.save();
+        res.status(200).json({ message: "Payment confirmed", order });
+      } catch (err) {
+        res.status(500).json({ message: "Internal server error", error: err.message });
+      }
+    });
+
+  } catch (err) { }
 }
+
 
 startServer();
 

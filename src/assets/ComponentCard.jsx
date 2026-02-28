@@ -4,11 +4,11 @@ import { useNavigate } from 'react-router-dom';
 import { useToast } from '../assets/Toast.jsx';
 import { addToCart } from '../utils/cartUtils.js';
 
-function CardComponent ({_id, name, company, price, description, ram, storage, image}) {
+function CardComponent({ _id, name, company, price, description, ram, storage, image }) {
     const navigate = useNavigate();
     const { showToast } = useToast();
     const [isAddingToCart, setIsAddingToCart] = useState(false);
-    
+
     const handleCardClick = () => {
         // Navigate to item page with phone details as params
         navigate('/item', {
@@ -26,14 +26,14 @@ function CardComponent ({_id, name, company, price, description, ram, storage, i
             }
         });
     };
-    
+
     const handleAddToCart = async (e) => {
         e.stopPropagation(); // Prevent triggering card click
-        
+
         if (isAddingToCart) return;
-        
+
         setIsAddingToCart(true);
-        
+
         try {
             // Check if user is logged in
             const token = localStorage.getItem('token');
@@ -42,7 +42,7 @@ function CardComponent ({_id, name, company, price, description, ram, storage, i
                 navigate('/login');
                 return;
             }
-            
+
             // Prepare item data
             const itemData = {
                 _id, // Use the _id parameter directly
@@ -54,7 +54,7 @@ function CardComponent ({_id, name, company, price, description, ram, storage, i
                 storage,
                 image
             };
-            
+
             // Use the utility function to add to cart (now handles backend integration)
             const result = await addToCart(itemData);
             showToast(result.message, result.success ? 'success' : 'error');
@@ -65,10 +65,10 @@ function CardComponent ({_id, name, company, price, description, ram, storage, i
             setIsAddingToCart(false);
         }
     };
-    
+
     const handleBuyNow = async (e) => {
         //e.stopPropagation(); // Prevent triggering card click
-        
+
         // Check if user is logged in
         const token = localStorage.getItem('token');
         if (!token) {
@@ -76,7 +76,7 @@ function CardComponent ({_id, name, company, price, description, ram, storage, i
             navigate('/login');
             return;
         }
-        
+
         try {
             // First add to cart
             await handleAddToCart(e);
@@ -87,7 +87,7 @@ function CardComponent ({_id, name, company, price, description, ram, storage, i
             showToast('Failed to process purchase. Please try again.', 'error');
         }
     };
-    
+
     return (
         <>
             <div className="component_contrainer" onClick={handleCardClick}>
@@ -102,15 +102,11 @@ function CardComponent ({_id, name, company, price, description, ram, storage, i
                 <div className="component_description">
                     <p>{description || 'No description available'}</p>
                 </div>
-                <div className="component_specs">
-                    <p>RAM: {ram}</p>
-                    <p>Storage: {storage}</p>
-                </div>
                 <div className="component_buttons">
                     <div className="component_add-to-cart-button">
-                        <button 
-                            onClick={handleAddToCart} 
-                            data-product-id={_id} 
+                        <button
+                            onClick={handleAddToCart}
+                            data-product-id={_id}
                             disabled={isAddingToCart}
                         >
                             {isAddingToCart ? 'Adding...' : 'Add to Cart'}
