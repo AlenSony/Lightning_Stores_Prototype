@@ -82,22 +82,16 @@ function CartPage() {
         }
 
         const totalWithTax = totalPrice + totalPrice * 0.08 - totalPrice * 0.05;
-        let response;
-        try{
+        try {
             const token = localStorage.getItem('token');
             if (!token) {
                 showToast('User not logged in.', 'error');
                 return;
             }
 
-            if (!token) {
-                showToast('Authentication token not found.', 'error');
-                return;
-            }
-
             const response = await fetch("http://localhost:5000/api/cart/checkout", {
                 method: "POST",
-                credentials:"include",
+                credentials: "include",
                 headers: {
                     "Content-Type": "application/json",
                     "Authorization": `Bearer ${token}`,
@@ -108,123 +102,124 @@ function CartPage() {
                     totalPrice: totalWithTax,
                 }),
             });
-            if(response.status === 200){
+            if (response.status === 200) {
                 showToast(`Proceeding to checkout! Total: ₹${totalWithTax.toFixed(2)}`, 'success');
                 setCartItems([]);
                 setTotalPrice(0);
             }
-            else{
+            else {
                 showToast(`Failed to checkout! Total: ₹${totalWithTax.toFixed(2)}`, 'error');
             }
         }
-        catch(err){
+        catch (err) {
             console.log(err);
             showToast('An error occurred during checkout.', 'error');
         }
-
-        
     };
 
     return (
         <div className="cart-page">
-            <h1>Your Shopping Cart</h1>
+            <h1 className="cart-page-title">Your Cart</h1>
+            <div className="cart-page-content">
 
-            {cartItems.length === 0 ? (
-                <div className="empty-cart">
-                    <div className="empty-cart-icon">
-                        <i className="fa-solid fa-shopping-cart"></i>
-                    </div>
-                    <p>Your cart is currently empty</p>
-                    <Link to="/main" className="continue-shopping-btn">
-                        Continue Shopping
-                    </Link>
-                </div>
-            ) : (
-                <div className="cart-container">
-                    <div className="cart-items">
-                        {cartItems.map((item, idx) => (
-                            <div key={item._id || item.id || idx} className="cart-item">
-                                <div className="cart-item-image">
-                                    <img
-                                        src={
-                                            item.productImage ||
-                                            item.image ||
-                                            `http://via.placeholder.com/100x100?text=${encodeURIComponent(item.productName || "Product")}`
-                                        }
-                                        onError={(e) => {
-                                            e.target.onerror = null;
-                                            e.target.src = "/fallback-product.png";
-                                        }}
-                                        alt={item.productName || item.model || "Product"}
-                                    />
-                                </div>
-
-                                <div className="cart-item-info">
-                                    <h3>{item.productName || item.model}</h3>
-                                    <p className="cart-item-description">{item.productDescription || item.brand}</p>
-                                    <p className="cart-item-price">
-                                        ₹{ (item.productPrice ?? item.price ?? 0).toLocaleString(undefined, { minimumFractionDigits: 2 }) }
-                                    </p>
-
-                                    <div className="quantity-control">
-                                        <button
-                                            className="quantity-btn minus"
-                                            onClick={() => handleQuantityChange(item.id, -1)}
-                                            disabled={item.quantity <= 1}
-                                        >
-                                            -
-                                        </button>
-                                        <span className="quantity">{item.quantity}</span>
-                                        <button
-                                            className="quantity-btn plus"
-                                            onClick={() => handleQuantityChange(item.id, 1)}
-                                        >
-                                            +
-                                        </button>
-                                    </div>
-                                </div>
-
-                                <button
-                                    className="remove-item-btn"
-                                    onClick={() => handleRemoveItem(item._id)}
-                                    aria-label={`Remove ${item.productName || item.model}`}
-                                >
-                                    <i className="fa-solid fa-trash"></i>
-                                </button>
-                            </div>
-                        ))}
-                    </div>
-
-                    <div className="cart-summary">
-                        <h3>Order Summary</h3>
-                        <div className="summary-row">
-                            <span>Items ({cartItems.length})</span>
-                            <span>₹{totalPrice.toFixed(2)}</span>
+                {cartItems.length === 0 ? (
+                    <div className="empty-cart">
+                        <div className="empty-cart-icon">
+                            📦
                         </div>
-                        <div className="summary-row"><span>Shipping</span><span>Free</span></div>
-                        <div className="summary-row"><span>Tax</span><span>₹{(totalPrice * 0.08).toFixed(2)}</span></div>
-                        <div className="summary-row discount"><span>Discount</span><span>-₹{(totalPrice * 0.05).toFixed(2)}</span></div>
-                        <div className="summary-divider"></div>
-                        <div className="summary-row total">
-                            <span>Order Total</span>
-                            <span>₹{(totalPrice + totalPrice * 0.08 - totalPrice * 0.05).toFixed(2)}</span>
-                        </div>
-                        <div className="delivery-info">
-                            <span>Estimated delivery:</span>
-                            <span>
-                                {new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - 
-                                {new Date(Date.now() + 10 * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                            </span>
-                        </div>
-                        <button className="buy-now-btn" onClick={handleBuyNow}>
-                            Proceed to Checkout
-                        </button>
-                        <Link to="/main" className="continue-shopping-btn small">
-                            <i className="fa-solid fa-arrow-left"></i> Continue Shopping
+                        <h2>Your cart is empty</h2>
+                        <p>Looks like you haven't added anything to your cart yet.</p>
+                        <Link to="/main" className="empty-continue-btn">
+                            Explore Store
                         </Link>
                     </div>
-                </div>
-            )}
+                ) : (
+                    <div className="cart-container">
+                        <div className="cart-items">
+                            {cartItems.map((item, idx) => (
+                                <div key={item._id || item.id || idx} className="cart-item">
+                                    <div className="cart-item-image">
+                                        <img
+                                            src={
+                                                item.productImage ||
+                                                item.image ||
+                                                `http://via.placeholder.com/100x100?text=${encodeURIComponent(item.productName || "Product")}`
+                                            }
+                                            onError={(e) => {
+                                                e.target.onerror = null;
+                                                e.target.src = "/fallback-product.png";
+                                            }}
+                                            alt={item.productName || item.model || "Product"}
+                                        />
+                                    </div>
+
+                                    <div className="cart-item-info">
+                                        <h3>{item.productName || item.model}</h3>
+                                        <p className="cart-item-description">{item.productDescription || item.brand}</p>
+                                        <p className="cart-item-price">
+                                            ₹{(item.productPrice ?? item.price ?? 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                                        </p>
+
+                                        <div className="quantity-control">
+                                            <button
+                                                className="quantity-btn minus"
+                                                onClick={() => handleQuantityChange(item.id, -1)}
+                                                disabled={item.quantity <= 1}
+                                            >
+                                                −
+                                            </button>
+                                            <span className="quantity">{item.quantity}</span>
+                                            <button
+                                                className="quantity-btn plus"
+                                                onClick={() => handleQuantityChange(item.id, 1)}
+                                            >
+                                                +
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <button
+                                        className="remove-item-btn"
+                                        onClick={() => handleRemoveItem(item._id)}
+                                        aria-label={`Remove ${item.productName || item.model}`}
+                                    >
+                                        ✕
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
+
+                        <div className="cart-summary">
+                            <h3>Order Summary</h3>
+                            <div className="summary-row">
+                                <span>Items ({cartItems.length})</span>
+                                <span>₹{totalPrice.toFixed(2)}</span>
+                            </div>
+                            <div className="summary-row"><span>Shipping</span><span>Free</span></div>
+                            <div className="summary-row"><span>Tax</span><span>₹{(totalPrice * 0.08).toFixed(2)}</span></div>
+                            <div className="summary-row discount"><span>Discount</span><span>-₹{(totalPrice * 0.05).toFixed(2)}</span></div>
+                            <div className="summary-divider"></div>
+                            <div className="summary-row total">
+                                <span>Total</span>
+                                <span>₹{(totalPrice + totalPrice * 0.08 - totalPrice * 0.05).toFixed(2)}</span>
+                            </div>
+                            <div className="delivery-info">
+                                <span>Estimated delivery:</span>
+                                <span>
+                                    {new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} -
+                                    {new Date(Date.now() + 10 * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                                </span>
+                            </div>
+                            <button className="buy-now-btn" onClick={handleBuyNow}>
+                                Checkout securely
+                            </button>
+                            <Link to="/main" className="continue-shopping-btn small">
+                                ← Continue Shopping
+                            </Link>
+                        </div>
+                    </div>
+                )}
+            </div>
         </div>
     );
 }

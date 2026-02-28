@@ -35,14 +35,14 @@ function MainPage() {
                         'Content-Type': 'application/json',
                     }
                 });
-                
-                
+
+
                 if (!res.ok) {
                     // Don't redirect to login, just log the error
                     console.error('Failed to fetch products:', res.status);
                     throw new Error('Failed to fetch products');
                 }
-                
+
                 const data = await res.json();
                 setDevices(data || []);
             } catch (e) {
@@ -52,7 +52,7 @@ function MainPage() {
                 setLoadingDevices(false);
             }
         };
-        
+
         fetchDevices();
     }, []);
 
@@ -94,7 +94,7 @@ function MainPage() {
 
     // Get unique companies from phone devices and merge with predefined list
     const deviceCompanies = new Set(phoneDevices.map(d => d.company).filter(Boolean));
-    const allCompanies = ['all', ...predefinedCompanies, ...deviceCompanies].filter((value, index, self) => 
+    const allCompanies = ['all', ...predefinedCompanies, ...deviceCompanies].filter((value, index, self) =>
         self.indexOf(value) === index
     ).sort((a, b) => {
         if (a === 'all') return -1;
@@ -109,7 +109,7 @@ function MainPage() {
 
     // Get unique companies from laptop devices
     const laptopDeviceCompanies = new Set(laptopDevices.map(d => d.company).filter(Boolean));
-    const allLaptopCompanies = ['all', ...predefinedLaptopCompanies, ...laptopDeviceCompanies].filter((value, index, self) => 
+    const allLaptopCompanies = ['all', ...predefinedLaptopCompanies, ...laptopDeviceCompanies].filter((value, index, self) =>
         self.indexOf(value) === index
     ).sort((a, b) => {
         if (a === 'all') return -1;
@@ -147,21 +147,21 @@ function MainPage() {
     // Helper function to check if device matches company (case-insensitive, checks both company field and device name)
     const deviceMatchesCompany = (device, companyName) => {
         if (!companyName || companyName === 'all') return true;
-        
+
         const companyLower = companyName.toLowerCase();
         const deviceCompany = (device.company || '').toLowerCase();
         const deviceName = (device.name || '').toLowerCase();
-        
+
         // First check exact match in company field
         if (deviceCompany === companyLower || deviceCompany.includes(companyLower)) {
             return true;
         }
-        
+
         // Check if company name appears in device name
         if (deviceName.includes(companyLower)) {
             return true;
         }
-        
+
         // Check brand-specific keywords
         const keywords = brandKeywords[companyLower] || [];
         for (const keyword of keywords) {
@@ -169,7 +169,7 @@ function MainPage() {
                 return true;
             }
         }
-        
+
         return false;
     };
 
@@ -183,7 +183,7 @@ function MainPage() {
                 devices: companyDevices
             };
         });
-        // .filter(group => group.devices.length > 0); // Keep all companies to show "Not Available" if empty
+    // .filter(group => group.devices.length > 0); // Keep all companies to show "Not Available" if empty
 
     // Prepare laptop slides
     const laptopSlides = allLaptopCompanies
@@ -261,18 +261,18 @@ function MainPage() {
     ];
 
     // Phone cards data
-    
+
 
     return (
         <div className="container">
             {/* Always show NavBar at the top */}
             <NavBar />
-            
+
             {/* Landing Page Section - First section visible when page loads */}
             <div className="landing-page-container">
                 <LandingPage onExploreClick={scrollToNewReleases} />
             </div>
-            
+
             {/* New Releases Section - Can be scrolled to or accessed via Explore button */}
             <div id="new-releases-section" className="new-releases-section">
                 {slides.map((slide, index) => (
@@ -300,8 +300,8 @@ function MainPage() {
                 <div className="slideshow-controls">
                     <div className="dots">
                         {slides.map((_, index) => (
-                            <span 
-                                key={index} 
+                            <span
+                                key={index}
                                 className={`dot ${currentSlide === index ? 'active' : ''}`}
                                 onClick={() => handleDotClick(index)}
                             ></span>
@@ -309,20 +309,20 @@ function MainPage() {
                     </div>
                 </div>
             </div>
-            
+
             {/* Phone Cards Section - Company Slider */}
             <div className="phone-cards-container">
                 <div className="section-header">
                     <h2 className="section-title">Browse Smartphones</h2>
                 </div>
-                
+
                 {loadingDevices ? (
-                    <div style={{ color: 'white', padding: '16px' }}>Loading products...</div>
+                    <div className="products-loading">Loading products…</div>
                 ) : companySlides.length > 0 ? (
                     <div className="company-slider-container">
                         {companySlides.map((slide, index) => (
-                            <div 
-                                key={slide.company} 
+                            <div
+                                key={slide.company}
                                 className={`company-slide ${currentCompanySlide === index ? 'active' : ''}`}
                             >
                                 <div className="company-title-wrapper">
@@ -332,7 +332,7 @@ function MainPage() {
                                         <button className="nav-btn next" onClick={handleCompanyNext}>❯</button>
                                     </div>
                                 </div>
-                                
+
                                 {slide.devices.length > 0 ? (
                                     <div className="phone-cards-grid">
                                         {slide.devices.slice(0, 8).map((d, deviceIndex) => (
@@ -360,11 +360,11 @@ function MainPage() {
                                 )}
                             </div>
                         ))}
-                        
+
                         <div className="company-slider-dots">
                             {companySlides.map((_, index) => (
-                                <span 
-                                    key={index} 
+                                <span
+                                    key={index}
                                     className={`company-dot ${currentCompanySlide === index ? 'active' : ''}`}
                                     onClick={() => handleCompanyDotClick(index)}
                                     title={companySlides[index].company}
@@ -373,9 +373,7 @@ function MainPage() {
                         </div>
                     </div>
                 ) : (
-                    <div style={{ color: 'white', padding: '16px' }}>
-                        No products found.
-                    </div>
+                    <div className="products-loading">No products found.</div>
                 )}
             </div>
 
@@ -384,14 +382,14 @@ function MainPage() {
                 <div className="section-header">
                     <h2 className="section-title">Browse Laptops</h2>
                 </div>
-                
+
                 {loadingDevices ? (
-                    <div style={{ color: 'white', padding: '16px' }}>Loading products...</div>
+                    <div className="products-loading">Loading laptops…</div>
                 ) : laptopSlides.length > 0 ? (
                     <div className="company-slider-container">
                         {laptopSlides.map((slide, index) => (
-                            <div 
-                                key={slide.company} 
+                            <div
+                                key={slide.company}
                                 className={`company-slide ${currentLaptopCompanySlide === index ? 'active' : ''}`}
                             >
                                 <div className="company-title-wrapper">
@@ -401,7 +399,7 @@ function MainPage() {
                                         <button className="nav-btn next" onClick={handleLaptopCompanyNext}>❯</button>
                                     </div>
                                 </div>
-                                
+
                                 {slide.devices.length > 0 ? (
                                     <div className="laptop-cards-grid">
                                         {slide.devices.slice(0, 8).map((d, deviceIndex) => (
@@ -429,11 +427,11 @@ function MainPage() {
                                 )}
                             </div>
                         ))}
-                        
+
                         <div className="company-slider-dots">
                             {laptopSlides.map((_, index) => (
-                                <span 
-                                    key={index} 
+                                <span
+                                    key={index}
                                     className={`company-dot ${currentLaptopCompanySlide === index ? 'active' : ''}`}
                                     onClick={() => handleLaptopCompanyDotClick(index)}
                                     title={laptopSlides[index].company}
@@ -442,13 +440,11 @@ function MainPage() {
                         </div>
                     </div>
                 ) : (
-                    <div style={{ color: 'white', padding: '16px' }}>
-                        No laptops found.
-                    </div>
+                    <div className="products-loading">No laptops found.</div>
                 )}
             </div>
-            
-    </div>
+
+        </div>
     )
 }
 
