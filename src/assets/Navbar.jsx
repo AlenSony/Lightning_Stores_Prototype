@@ -68,16 +68,18 @@ function NavBar() {
             <div className="search-bar">
                 <div className="search-container">
                     <form onSubmit={handleSearch}>
-                        <input
-                            name="product_search"
-                            type="text"
-                            placeholder="Search for products..."
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                        />
-                        <button type="submit"><i className="fa-solid fa-magnifying-glass"></i></button>
+                        <div className="InputContainer">
+                            <input
+                                placeholder="Search.."
+                                id="input"
+                                className="input"
+                                name="text"
+                                type="text"
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                            />
+                        </div>
                     </form>
-
                 </div>
                 <button onClick={handleCartClick} className={`cart-button ${cartButtonAnimation ? 'add-animation' : ''}`}>
                     <i className="fa-solid fa-cart-shopping"></i>

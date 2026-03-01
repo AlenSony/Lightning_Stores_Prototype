@@ -60,6 +60,7 @@
         0 0 0 1px rgba(255, 255, 255, 0.2) inset;
     backdrop-filter: blur(20px);
     overflow: hidden;
+    margin-top: -1rem;
 }
 
 /* ══════════════════════════════════════════════════════════════════════════
@@ -395,6 +396,22 @@
 .action-btn--buy:hover:not(:disabled) {
     transform: translateY(-2px);
     box-shadow: 0 8px 28px rgba(31, 117, 254, 0.55);
+}
+
+.item-actions-out-of-stock {
+    width: 100%;
+    padding: 1.5rem;
+    background: rgba(255, 59, 48, 0.05);
+    border: 1px dashed rgba(255, 59, 48, 0.3);
+    border-radius: 18px;
+    text-align: center;
+}
+
+.out-of-stock-notice {
+    color: #ff3b30;
+    font-weight: 700;
+    font-size: 1.1rem;
+    margin: 0;
 }
 
 /* ══════════════════════════════════════════════════════════════════════════

@@ -223,18 +223,18 @@ async function startServer() {
       }
     });
 
-    app.get("/api/product", AuthMiddleware, async (req, res) => {
+    app.get("/api/product", async (req, res) => {
       try {
         const { company } = req.query;
 
         // If company filter is provided, filter by company (case-insensitive)
         let query = {};
-        if (company && company !== 'all') {
+        if (company && company !== "all") {
           query = {
             $or: [
               { company: { $regex: company, $options: "i" } },
-              { name: { $regex: company, $options: "i" } }
-            ]
+              { name: { $regex: company, $options: "i" } },
+            ],
           };
         }
 
@@ -245,73 +245,7 @@ async function startServer() {
       }
     });
 
-    // GET /api/product/variants — fetch sibling variants for a product
-    // Query params: id (required), company (required)
-    //
-    // Convention: variant products share the same base model name, with
-    // the specific variant described in parentheses, e.g.:
-    //   "iPhone 16 Pro (256GB, Black)"
-    //   "iPhone 16 Pro (512GB, Natural Titanium)"
-    // The base name is everything BEFORE the first '('.
-    // Products without '(' in their name are treated as standalone (no siblings).
-    app.get("/api/product/variants", AuthMiddleware, async (req, res) => {
-      try {
-        const { id, company } = req.query;
-        if (!id || !company) {
-          return res.status(400).json({ message: "id and company are required" });
-        }
-
-        // Fetch the reference product
-        const reference = await Device.findById(id);
-        if (!reference) {
-          return res.status(404).json({ message: "Product not found" });
-        }
-
-        // Extract base model name: everything before the first '('
-        const parenIndex = reference.name.indexOf('(');
-        if (parenIndex === -1) {
-          // No parenthesis → no siblings; return just this product
-          return res.status(200).json([reference]);
-        }
-
-        const baseName = reference.name.slice(0, parenIndex).trim();
-        if (!baseName) {
-          return res.status(200).json([reference]);
-        }
-
-        // Escape special regex chars in the base name
-        const escapedBase = baseName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-
-        // Find all products from the same company whose name starts with baseName
-        // followed by a space or '(' so we don't accidentally match prefixes
-        const siblings = await Device.find({
-          company: { $regex: `^${company.trim()}$`, $options: 'i' },
-          name: { $regex: `^${escapedBase}\\s*\\(`, $options: 'i' },
-        });
-
-        res.status(200).json(siblings);
-      } catch (err) {
-        console.error("Error in /api/product/variants:", err);
-        res.status(500).json({ message: "Internal server error" });
-      }
-    });
-
-
-    // GET /api/product/:id — fetch a single product by its MongoDB _id
-    app.get("/api/product/:id", AuthMiddleware, async (req, res) => {
-      try {
-        const product = await Device.findById(req.params.id);
-        if (!product) {
-          return res.status(404).json({ message: "Product not found" });
-        }
-        res.status(200).json(product);
-      } catch (err) {
-        console.error("Error in /api/product/:id:", err);
-        res.status(500).json({ message: "Internal server error" });
-      }
-    });
-
-    app.get("/api/product/search", AuthMiddleware, async (req, res) => {
+    app.get("/api/product/search", async (req, res) => {
       try {
         const { query } = req.query;
 
@@ -333,6 +267,73 @@ async function startServer() {
         res.status(200).json(products);
       } catch (err) {
         console.error("Search error:", err);
+        res.status(500).json({ message: "Internal server error" });
+      }
+    });
+
+    // GET /api/product/variants — fetch sibling variants for a product
+    // Query params: id (required), company (required)
+    //
+    // Convention: variant products share the same base model name, with
+    // the specific variant described in parentheses, e.g.:
+    //   "iPhone 16 Pro (256GB, Black)"
+    //   "iPhone 16 Pro (512GB, Natural Titanium)"
+    // The base name is everything BEFORE the first '('.
+    // Products without '(' in their name are treated as standalone (no siblings).
+    app.get("/api/product/variants", async (req, res) => {
+      try {
+        const { id, company } = req.query;
+        if (!id || !company) {
+          return res
+            .status(400)
+            .json({ message: "id and company are required" });
+        }
+
+        // Fetch the reference product
+        const reference = await Device.findById(id);
+        if (!reference) {
+          return res.status(404).json({ message: "Product not found" });
+        }
+
+        // Extract base model name: everything before the first '('
+        const parenIndex = reference.name.indexOf("(");
+        if (parenIndex === -1) {
+          // No parenthesis → no siblings; return just this product
+          return res.status(200).json([reference]);
+        }
+
+        const baseName = reference.name.slice(0, parenIndex).trim();
+        if (!baseName) {
+          return res.status(200).json([reference]);
+        }
+
+        // Escape special regex chars in the base name
+        const escapedBase = baseName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+        // Find all products from the same company whose name starts with baseName
+        // followed by a space or '(' so we don't accidentally match prefixes
+        const siblings = await Device.find({
+          company: { $regex: `^${company.trim()}$`, $options: "i" },
+          name: { $regex: `^${escapedBase}\\s*\\(`, $options: "i" },
+        });
+
+        res.status(200).json(siblings);
+      } catch (err) {
+        console.error("Error in /api/product/variants:", err);
+        res.status(500).json({ message: "Internal server error" });
+      }
+    });
+
+    // GET /api/product/:id — fetch a single product by its MongoDB _id
+    app.get("/api/product/:id", async (req, res) => {
+      try {
+        const product = await Device.findById(req.params.id);
+        if (!product) {
+          return res.status(404).json({ message: "Product not found" });
+        }
+        res.status(200).json(product);
+      } catch (err) {
+        console.error("Error in /api/product/:id:", err);
         res.status(500).json({ message: "Internal server error" });
       }
     });
@@ -600,7 +601,11 @@ async function startServer() {
 
         // Only the three truly essential fields are hard-required
         if (!name || !company || !expected_price) {
-          return res.status(400).json({ message: "name, company, and expected_price are required" });
+          return res
+            .status(400)
+            .json({
+              message: "name, company, and expected_price are required",
+            });
         }
 
         // Build the stored name
@@ -624,10 +629,14 @@ async function startServer() {
         });
 
         await newDevice.save();
-        res.status(201).json({ message: "Product added successfully", product: newDevice });
+        res
+          .status(201)
+          .json({ message: "Product added successfully", product: newDevice });
       } catch (err) {
         console.error("Error in POST /api/admin/product:", err);
-        res.status(500).json({ message: "Internal server error", error: err.message });
+        res
+          .status(500)
+          .json({ message: "Internal server error", error: err.message });
       }
     });
 
@@ -640,7 +649,9 @@ async function startServer() {
         const products = await Device.find({}).sort({ createdAt: -1 });
         res.status(200).json(products);
       } catch (err) {
-        res.status(500).json({ message: "Internal server error", error: err.message });
+        res
+          .status(500)
+          .json({ message: "Internal server error", error: err.message });
       }
     });
 
@@ -651,7 +662,18 @@ async function startServer() {
         if (!requestingUser || requestingUser.role !== "admin")
           return res.status(403).json({ message: "Admin access required" });
 
-        const { name, company, description, ram, storage, expected_price, actual_price, stock, category, image_url } = req.body;
+        const {
+          name,
+          company,
+          description,
+          ram,
+          storage,
+          expected_price,
+          actual_price,
+          stock,
+          category,
+          image_url,
+        } = req.body;
         const updated = await Device.findByIdAndUpdate(
           req.params.id,
           {
@@ -666,12 +688,17 @@ async function startServer() {
             category,
             image_url: image_url || "/placeholder.jpg",
           },
-          { new: true }   // no runValidators — avoids re-checking unrelated required fields
+          { new: true } // no runValidators — avoids re-checking unrelated required fields
         );
-        if (!updated) return res.status(404).json({ message: "Product not found" });
-        res.status(200).json({ message: "Product updated successfully", product: updated });
+        if (!updated)
+          return res.status(404).json({ message: "Product not found" });
+        res
+          .status(200)
+          .json({ message: "Product updated successfully", product: updated });
       } catch (err) {
-        res.status(500).json({ message: "Internal server error", error: err.message });
+        res
+          .status(500)
+          .json({ message: "Internal server error", error: err.message });
       }
     });
 
@@ -682,10 +709,13 @@ async function startServer() {
         if (!requestingUser || requestingUser.role !== "admin")
           return res.status(403).json({ message: "Admin access required" });
         const deleted = await Device.findByIdAndDelete(req.params.id);
-        if (!deleted) return res.status(404).json({ message: "Product not found" });
+        if (!deleted)
+          return res.status(404).json({ message: "Product not found" });
         res.status(200).json({ message: "Product deleted successfully" });
       } catch (err) {
-        res.status(500).json({ message: "Internal server error", error: err.message });
+        res
+          .status(500)
+          .json({ message: "Internal server error", error: err.message });
       }
     });
 
@@ -698,31 +728,46 @@ async function startServer() {
         const admins = await User.find({ role: "admin" }).select("-password");
         res.status(200).json(admins);
       } catch (err) {
-        res.status(500).json({ message: "Internal server error", error: err.message });
+        res
+          .status(500)
+          .json({ message: "Internal server error", error: err.message });
       }
     });
 
     // PATCH /api/admin/revoke-admin/:id — demote admin back to user
-    app.patch("/api/admin/revoke-admin/:id", AuthMiddleware, async (req, res) => {
-      try {
-        const requestingUser = await User.findById(req.user.userId);
-        if (!requestingUser || requestingUser.role !== "admin")
-          return res.status(403).json({ message: "Admin access required" });
+    app.patch(
+      "/api/admin/revoke-admin/:id",
+      AuthMiddleware,
+      async (req, res) => {
+        try {
+          const requestingUser = await User.findById(req.user.userId);
+          if (!requestingUser || requestingUser.role !== "admin")
+            return res.status(403).json({ message: "Admin access required" });
 
-        if (req.params.id === String(requestingUser._id))
-          return res.status(400).json({ message: "Cannot revoke your own admin access" });
+          if (req.params.id === String(requestingUser._id))
+            return res
+              .status(400)
+              .json({ message: "Cannot revoke your own admin access" });
 
-        const target = await User.findByIdAndUpdate(req.params.id, { role: "user" }, { new: true });
-        if (!target) return res.status(404).json({ message: "User not found" });
-        res.status(200).json({ message: `${target.name} has been demoted to user` });
-      } catch (err) {
-        res.status(500).json({ message: "Internal server error", error: err.message });
+          const target = await User.findByIdAndUpdate(
+            req.params.id,
+            { role: "user" },
+            { new: true }
+          );
+          if (!target)
+            return res.status(404).json({ message: "User not found" });
+          res
+            .status(200)
+            .json({ message: `${target.name} has been demoted to user` });
+        } catch (err) {
+          res
+            .status(500)
+            .json({ message: "Internal server error", error: err.message });
+        }
       }
-    });
+    );
 
     app.post("/api/order/buy_now", AuthMiddleware, async (req, res) => {
-
-
       try {
         const { itemId, quantity } = req.body;
         const userId = req.user.userId || req.user.id; // safer extraction
@@ -766,8 +811,16 @@ async function startServer() {
         }
 
         const { items, totalPrice } = req.body; // from frontend
-        if (!items || items.length === 0 || totalPrice === undefined || totalPrice === null) {
-          console.error("Checkout Validation Error: Items or totalPrice missing.", req.body);
+        if (
+          !items ||
+          items.length === 0 ||
+          totalPrice === undefined ||
+          totalPrice === null
+        ) {
+          console.error(
+            "Checkout Validation Error: Items or totalPrice missing.",
+            req.body
+          );
           return res.status(400).json({ message: "Invalid checkout data" });
         }
 
@@ -801,12 +854,13 @@ async function startServer() {
     // POST /api/order/:id/razorpay - Generate Razorpay Order
     app.post("/api/order/:id/razorpay", AuthMiddleware, async (req, res) => {
       try {
-
         const userId = req.user.userId;
         const order = await Order.findById(req.params.id);
         if (!order) return res.status(404).json({ message: "Order not found" });
-        if (String(order.user_id) !== String(userId)) return res.status(403).json({ message: "Not your order" });
-        if (order.payment_status === "paid" || order.paymentStatus === "paid") return res.status(400).json({ message: "Order already paid" });
+        if (String(order.user_id) !== String(userId))
+          return res.status(403).json({ message: "Not your order" });
+        if (order.payment_status === "paid" || order.paymentStatus === "paid")
+          return res.status(400).json({ message: "Order already paid" });
 
         const RAZORPAY_MAX_LIMIT_INR = 500000; // 5 Lakhs
         const RAZORPAY_MIN_LIMIT_INR = 1;
@@ -827,7 +881,10 @@ async function startServer() {
 
         const instance = new Razorpay({
           key_id: process.env.RAZORPAY_KEY_ID?.replace(/["']/g, "").trim(),
-          key_secret: process.env.RAZORPAY_KEY_SECRET?.replace(/["']/g, "").trim(),
+          key_secret: process.env.RAZORPAY_KEY_SECRET?.replace(
+            /["']/g,
+            ""
+          ).trim(),
         });
 
         const options = {
@@ -835,7 +892,6 @@ async function startServer() {
           currency: "INR",
           receipt: order._id.toString(),
         };
-
 
         const razorpayOrder = await instance.orders.create(options);
 
@@ -846,17 +902,30 @@ async function startServer() {
         });
       } catch (err) {
         console.error("Razorpay Error:", err);
-        res.status(500).json({ message: "Failed to create Razorpay order", error: err.message });
+        res
+          .status(500)
+          .json({
+            message: "Failed to create Razorpay order",
+            error: err.message,
+          });
       }
     });
 
     // POST /api/order/verify-payment - Verify signature and mark paid
     app.post("/api/order/verify-payment", AuthMiddleware, async (req, res) => {
       try {
-        const { order_id, razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
+        const {
+          order_id,
+          razorpay_order_id,
+          razorpay_payment_id,
+          razorpay_signature,
+        } = req.body;
 
         const generated_signature = crypto
-          .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET?.replace(/["']/g, "").trim() || "")
+          .createHmac(
+            "sha256",
+            process.env.RAZORPAY_KEY_SECRET?.replace(/["']/g, "").trim() || ""
+          )
           .update(razorpay_order_id + "|" + razorpay_payment_id)
           .digest("hex");
 
@@ -873,9 +942,13 @@ async function startServer() {
         // Optionally save razorpay_order_id and razorpay_payment_id inside order modal but simplified here
         await order.save();
 
-        res.status(200).json({ message: "Payment verified successfully", order });
+        res
+          .status(200)
+          .json({ message: "Payment verified successfully", order });
       } catch (err) {
-        res.status(500).json({ message: "Internal server error", error: err.message });
+        res
+          .status(500)
+          .json({ message: "Internal server error", error: err.message });
       }
     });
 
@@ -893,13 +966,13 @@ async function startServer() {
         await order.save();
         res.status(200).json({ message: "Payment confirmed", order });
       } catch (err) {
-        res.status(500).json({ message: "Internal server error", error: err.message });
+        res
+          .status(500)
+          .json({ message: "Internal server error", error: err.message });
       }
     });
-
-  } catch (err) { }
+  } catch (err) {}
 }
-
 
 startServer();
 

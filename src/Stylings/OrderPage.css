@@ -3,7 +3,6 @@
 /* ═══════════ PAGE SHELL ═══════════════════════════════════════════════════ */
 .orders-page {
     min-height: 100vh;
-    background: linear-gradient(135deg, #6f6e6e 0%, #ffffff 100%);
     font-family: 'Inter', sans-serif;
 }
 
@@ -11,6 +10,7 @@
     max-width: 860px;
     margin: 0 auto;
     padding: 7rem 1.5rem 3rem;
+    margin-top: 2rem;
 }
 
 /* ═══════════ LOADING ══════════════════════════════════════════════════════ */

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Aurora from '../assets/Aurora.jsx';
+import '../Stylings/LoginPage.css';
 
 function LoginPage() {
   const navigate = useNavigate();
@@ -93,268 +94,122 @@ function LoginPage() {
   
 
   return (
-    <div style={{ 
-      width: '100vw',
-      height: '100vh', 
-      backgroundColor: 'black', 
-      position: 'relative',
-      overflow: 'hidden'
-    }}>
+    <div className="login-wrapper">
       <Aurora 
         colorStops={['#5227FF', '#00C6FF', '#7cff67']} 
         amplitude={1.2} 
         blend={0.6}
       />
       
-      
-      <div style={{
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        width: '100%',
-        height: '100%',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        zIndex: 10,
-        padding: '20px'
-      }}>
-        <div style={{
-          background: 'rgba(255, 255, 255, 0.5)',
-          backdropFilter: 'blur(15px)',
-          borderRadius: '20px',
-          padding: '40px',
-          border: '1px solid rgba(255, 255, 255, 0.2)',
-          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
-          maxWidth: '450px',
-          width: '100%',
-          textAlign: 'center'
-        }}>
+      <div className="login-container">
+        <div className="login-card">
           {/* Header */}
-          <div style={{ marginBottom: '30px' }}>
-            <h1 style={{ 
-              color: 'rgba(32, 32, 32, 1)', 
-              fontSize: '32px', 
-              marginBottom: '10px',
-              fontFamily: 'fantasy'
-            }}>
-              Novara
-            </h1>
-            <p style={{ 
-              color: 'rgba(32, 32, 32, 0.7)', 
-              fontSize: '16px',
-              margin: 0
-            }}>
+          <div className="login-header">
+            <h1 className="login-logo">Novara</h1>
+            <p className="login-subtitle">
               {isLogin ? 'Welcome back!' : 'Create your account'}
             </p>
           </div>
 
           {/* Toggle Buttons */}
-          <div style={{
-            display: 'flex',
-            background: 'rgba(255, 255, 255, 0.1)',
-            borderRadius: '10px',
-            padding: '4px',
-            marginBottom: '30px'
-          }}>
+          <div className="login-toggle">
             <button
               onClick={() => setIsLogin(true)}
-              style={{
-                flex: 1,
-                padding: '12px',
-                borderRadius: '8px',
-                border: 'none',
-                background: isLogin ? 'rgba(255, 255, 255, 0.2)' : 'transparent',
-                color: 'rgba(32, 32, 32, 1)',
-                fontSize: '16px',
-                cursor: 'pointer',
-                transition: 'all 0.3s'
-              }}
+              className={`toggle-btn ${isLogin ? 'active' : ''}`}
             >
               Login
             </button>
             <button
               onClick={() => setIsLogin(false)}
-              style={{
-                flex: 1,
-                padding: '12px',
-                borderRadius: '8px',
-                border: 'none',
-                background: !isLogin ? 'rgba(255, 255, 255, 0.2)' : 'transparent',
-                color: 'rgba(32, 32, 32, 1)',
-                fontSize: '16px',
-                cursor: 'pointer',
-                transition: 'all 0.3s'
-              }}
+              className={`toggle-btn ${!isLogin ? 'active' : ''}`}
             >
               Sign Up
             </button>
           </div>
 
           {/* Form */}
-          <form onSubmit={handleSubmit}>
+          <form className="login-form" onSubmit={handleSubmit}>
             {!isLogin && (
-              <input
-                name="name"
-                type="text"
-                placeholder="Full Name"
-                value={formData.name}
-                onChange={handleInputChange}
-                style={{
-                  width: '100%',
-                  padding: '15px',
-                  borderRadius: '10px',
-                  border: '1px solid rgb(0, 0, 0)',
-                  background: 'rgba(255, 255, 255, 0.1)',
-                  color: 'rgba(32, 32, 32, 1)',
-                  fontSize: '16px',
-                  marginBottom: '15px',
-                  outline: 'none',
-                  boxSizing: 'border-box'
-                }}
-              />
+              <div className="form-group">
+                <input
+                  name="name"
+                  type="text"
+                  placeholder="Full Name"
+                  value={formData.name}
+                  onChange={handleInputChange}
+                  className="login-input"
+                />
+              </div>
             )}
             
-            <input
-              name="email"
-              type="email"
-              placeholder="Email Address"
-              value={formData.email}
-              onChange={handleInputChange}
-              style={{
-                width: '100%',
-                padding: '15px',
-                borderRadius: '10px',
-                border: '1px solid rgb(0, 0, 0)',
-                background: 'rgba(255, 255, 255, 0.1)',
-                color: 'rgba(32, 32, 32, 1)',
-                fontSize: '16px',
-                marginBottom: '15px',
-                outline: 'none',
-                boxSizing: 'border-box'
-              }}
-            />
+            <div className="form-group">
+              <input
+                name="email"
+                type="email"
+                placeholder="Email Address"
+                value={formData.email}
+                onChange={handleInputChange}
+                className="login-input"
+              />
+            </div>
             
-            <input
-              name="password"
-              type="password"
-              placeholder="Password"
-              value={formData.password}
-              onChange={handleInputChange}
-              style={{
-                width: '100%',
-                padding: '15px',
-                borderRadius: '10px',
-                border: '1px solid rgb(0, 0, 0)',
-                background: 'rgba(255, 255, 255, 0.1)',
-                color: 'rgba(32, 32, 32, 1)',
-                fontSize: '16px',
-                marginBottom: !isLogin ? '15px' : '20px',
-                outline: 'none',
-                boxSizing: 'border-box'
-              }}
-            />
+            <div className="form-group">
+              <input
+                name="password"
+                type="password"
+                placeholder="Password"
+                value={formData.password}
+                onChange={handleInputChange}
+                className="login-input"
+              />
+            </div>
             
             {!isLogin && (
-              <input
-                name="confirmPassword"
-                type="password"
-                placeholder="Confirm Password"
-                value={formData.confirmPassword}
-                onChange={handleInputChange}
-                style={{
-                  width: '100%',
-                  padding: '15px',
-                  borderRadius: '10px',
-                  border: '1px solid rgb(0, 0, 0)',
-                  background: 'rgba(255, 255, 255, 0.1)',
-                  color: 'rgba(32, 32, 32, 1)',
-                  fontSize: '16px',
-                  marginBottom: '20px',
-                  outline: 'none',
-                  boxSizing: 'border-box'
-                }}
-              />
+              <div className="form-group">
+                <input
+                  name="confirmPassword"
+                  type="password"
+                  placeholder="Confirm Password"
+                  value={formData.confirmPassword}
+                  onChange={handleInputChange}
+                  className="login-input"
+                />
+              </div>
             )}
 
             {error && (
-              <div style={{
-                color: '#ff6b6b',
-                fontSize: '14px',
-                marginBottom: '20px',
-                textAlign: 'left'
-              }}>
+              <div className="login-error">
                 {error}
               </div>
             )}
 
-            <button
-              type="submit"
-              style={{
-                width: '100%',
-                padding: '15px',
-                borderRadius: '10px',
-                background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.1))',
-                color: 'rgba(32, 32, 32, 1)',
-                border: '1px solid rgba(0, 0, 0, 0.56)',
-                fontSize: '16px',
-                fontWeight: '600',
-                cursor: 'pointer',
-                transition: 'all 0.3s',
-                marginBottom: '20px'
-              }}
-              onMouseOver={(e) => {
-                e.target.style.background = 'linear-gradient(135deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.2))';
-                e.target.style.transform = 'translateY(-2px)';
-              }}
-              onMouseOut={(e) => {
-                e.target.style.background = 'linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.1))';
-                e.target.style.transform = 'translateY(0)';
-              }}
-            >
+            <button type="submit" className="login-submit-btn">
               {isLogin ? 'Sign In' : 'Create Account'}
             </button>
           </form>
 
           {/* Footer */}
-          <div style={{
-            color: 'rgba(0, 0, 0, 0.6)',
-            fontSize: '14px'
-          }}>
+          <div className="login-footer">
             {isLogin ? (
-              <>
+              <p>
                 Don't have an account?{' '}
                 <button
                   onClick={() => setIsLogin(false)}
-                  style={{
-                    background: 'none',
-                    border: 'none',
-                    color: 'rgba(0, 0, 0, 0.6)',
-                    textDecoration: 'none',
-                    cursor: 'pointer',
-                    fontSize: '14px'
-                  }}
+                  className="toggle-link"
                 >
                   Sign up here
                 </button>
-              </>
+              </p>
             ) : (
-              <>
+              <p>
                 Already have an account?{' '}
                 <button
                   onClick={() => setIsLogin(true)}
-                  style={{
-                    background: 'none',
-                    border: 'none',
-                    color: 'rgba(0, 0, 0, 0.6)',
-                    textDecoration: 'none',
-                    cursor: 'pointer',
-                    fontSize: '14px'
-                  }}
+                  className="toggle-link"
                 >
                   Sign in here
                 </button>
-              </>
+              </p>
             )}
           </div>
         </div>

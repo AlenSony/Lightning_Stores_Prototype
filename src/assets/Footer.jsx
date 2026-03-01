@@ -1,16 +1,15 @@
-import React from 'react';
-import '../Stylings/Footer.css';
 import 'font-awesome/css/font-awesome.min.css';
+import '../Stylings/Footer.css';
 
 const Footer = () => {
     return (
         <footer className="footer-container">
             <div className="footer-content">
                 <div className="footer-section brand-section">
-                    <h2 className="footer-logo">Lightning Stores</h2>
+                    <h2 className="footer-logo">Novara E-Commerce</h2>
                     <p className="footer-description">
-                        Premium electronics delivered with lightning speed. 
-                        Experience the future of technology today.
+                        Space for tech enthusiasts to buy their dream items.
+
                     </p>
                     <div className="social-icons">
                         <a href="#" className="social-icon"><i className="fa fa-facebook"></i></a>
@@ -34,15 +33,15 @@ const Footer = () => {
                     <h3>Contact Us</h3>
                     <div className="contact-item">
                         <i className="fa fa-map-marker"></i>
-                        <span>123 Tech Avenue, Silicon Valley, CA</span>
+                        <span>Kottayam, Kerala, 689588</span>
                     </div>
                     <div className="contact-item">
                         <i className="fa fa-phone"></i>
-                        <span>+1 (555) 123-4567</span>
+                        <span>+919456724365</span>
                     </div>
                     <div className="contact-item">
                         <i className="fa fa-envelope"></i>
-                        <span>support@lightningstores.com</span>
+                        <span>support@novaraecommerce.com</span>    
                     </div>
                 </div>
 
@@ -57,7 +56,7 @@ const Footer = () => {
             </div>
 
             <div className="footer-bottom">
-                <p>&copy; {new Date().getFullYear()} Lightning Stores. All rights reserved.</p>
+                <p>&copy; {new Date().getFullYear()} Novara E-Commerce. All rights reserved.</p>
                 <div className="footer-bottom-links">
                     <a href="#">Privacy Policy</a>
                     <a href="#">Terms of Service</a>

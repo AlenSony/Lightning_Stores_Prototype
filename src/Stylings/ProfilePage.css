@@ -6,8 +6,8 @@
 
 /* ── Page shell ─────────────────────────────────────────────────────────── */
 .profile-page-container {
+    margin-top: 2rem;
     min-height: 100vh;
-    background: linear-gradient(135deg, #6f6e6e 0%, #ffffff 100%);
     font-family: 'Inter', sans-serif;
 }
 

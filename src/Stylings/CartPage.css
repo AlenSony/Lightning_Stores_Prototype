@@ -55,24 +55,59 @@
     margin-bottom: 2.5rem;
 }
 
-.empty-continue-btn {
-    display: inline-block;
-    padding: 14px 36px;
-    background: linear-gradient(135deg, #1F75FE 0%, #00BFFF 100%);
-    color: white;
-    border-radius: 50px;
+/* From Uiverse.io by alexmaracinaru */
+.cta {
+    border: none;
+    background: none;
+    cursor: pointer;
     text-decoration: none;
-    font-weight: 700;
-    font-size: 1rem;
-    box-shadow: 0 8px 20px rgba(31, 117, 254, 0.3);
-    transition: all 0.3s ease;
-    text-transform: uppercase;
-    letter-spacing: 1px;
+    display: inline-flex;
+    align-items: center;
 }
 
-.empty-continue-btn:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 12px 28px rgba(31, 117, 254, 0.45);
+.cta span {
+    padding-bottom: 7px;
+    letter-spacing: 4px;
+    font-size: 14px;
+    padding-right: 15px;
+    text-transform: uppercase;
+}
+
+.cta svg {
+    transform: translateX(-8px);
+    transition: all 0.3s ease;
+}
+
+.cta:hover svg {
+    transform: translateX(0);
+}
+
+.cta:active svg {
+    transform: scale(0.9);
+}
+
+.hover-underline-animation {
+    position: relative;
+    color: #1a237e; /* Match theme color */
+    padding-bottom: 20px;
+}
+
+.hover-underline-animation:after {
+    content: "";
+    position: absolute;
+    width: 100%;
+    transform: scaleX(0);
+    height: 2px;
+    bottom: 0;
+    left: 0;
+    background-color: #1a237e; /* Match theme color */
+    transform-origin: bottom right;
+    transition: transform 0.25s ease-out;
+}
+
+.cta:hover .hover-underline-animation:after {
+    transform: scaleX(1);
+    transform-origin: bottom left;
 }
 
 /* ── Cart Container (Layout) ─────────────────────────────────────────────── */

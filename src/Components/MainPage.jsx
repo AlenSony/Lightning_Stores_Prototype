@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import CardComponent from '../assets/ComponentCard.jsx';
+import Footer from '../assets/Footer.jsx';
 import NavBar from '../assets/Navbar.jsx';
 import '../Stylings/MainPage.css';
 import LandingPage from './LandingPage.jsx';
@@ -10,6 +11,7 @@ function MainPage() {
     const [loadingDevices, setLoadingDevices] = useState(true);
     const [selectedCompany, setSelectedCompany] = useState('all');
     const totalSlides = 3;
+    const [menuOpen, setMenuOpen] = useState(false);
 
     // State for company slider
     const [currentCompanySlide, setCurrentCompanySlide] = useState(0);
@@ -346,6 +348,8 @@ function MainPage() {
                                                 ram={d.ram}
                                                 storage={d.storage}
                                                 image={d.image_url || d.image}
+                                                stock={d.stock}
+                                                inStock={d.inStock}
                                             />
                                         ))}
                                     </div>
@@ -413,6 +417,8 @@ function MainPage() {
                                                 ram={d.ram}
                                                 storage={d.storage}
                                                 image={d.image_url || d.image}
+                                                stock={d.stock}
+                                                inStock={d.inStock}
                                             />
                                         ))}
                                     </div>
@@ -443,6 +449,7 @@ function MainPage() {
                     <div className="products-loading">No laptops found.</div>
                 )}
             </div>
+            <Footer/>
 
         </div>
     )
