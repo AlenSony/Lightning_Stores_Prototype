@@ -1,5 +1,5 @@
 import GlitchText from '../assets/GlitchText.jsx';
-
+import M2 from '../assets/M2.jsx';
 import '../Stylings/LandingPage.css';
 
 function LandingPage({ onExploreClick }) {
@@ -67,11 +67,12 @@ function LandingPage({ onExploreClick }) {
               A
             </GlitchText>
           </div>
-          
+
           <div className="laptop">
             <div className="screen">
               <div className="header"></div>
-              <div className="text">A complete digital space for tech enthusiasts to discover, buy, and sell their devices.</div>
+
+              <div className="text"><M2 /></div>
             </div>
             <div className="keyboard"></div>
           </div>
@@ -79,6 +80,19 @@ function LandingPage({ onExploreClick }) {
 
           {/* Call to Action Button */}
           <div className="cta-container">
+            <div class="card">
+              <div class="loader">
+                <p>A complete space for</p>
+                <div class="words">
+                  <span class="word">your gadgets</span>
+                  <span class="word">smart living</span>
+                  <span class="word">digital life</span>
+                  <span class="word">innovation</span>
+                  <span class="word">next-gen tech</span>
+                </div>
+              </div>
+            </div>
+
             <button className="cta" onClick={onExploreClick}>
               <span className="hover-underline-animation"> Shop now </span>
               <svg

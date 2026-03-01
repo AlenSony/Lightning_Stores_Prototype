@@ -204,10 +204,12 @@ html {
 /* CTA Button Styles */
 .cta-container {
   position: absolute;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
   bottom: 4rem;
   left: 50%;
   transform: translateX(-50%);
-  display: flex;
   justify-content: center;
   align-items: center;
   opacity: 0;
@@ -256,7 +258,8 @@ html {
 
 .hover-underline-animation {
   position: relative;
-  color: #000000; /* Adjusted to white for visibility on dark/glassy backgrounds */
+  color: #000000;
+  /* Adjusted to white for visibility on dark/glassy backgrounds */
   padding-bottom: 20px;
 }
 
@@ -268,7 +271,8 @@ html {
   height: 2px;
   bottom: 0;
   left: 0;
-  background-color: #000000; /* Adjusted to white */
+  background-color: #000000;
+  /* Adjusted to white */
   transform-origin: bottom right;
   transition: transform 0.25s ease-out;
 }
@@ -354,14 +358,107 @@ html {
   }
 }
 
+/* From Uiverse.io by kennyotsu */
+.card {
+  /* color used to softly clip top and bottom of the .words container */
+  --bg-color: #11111100;
+  background-color: var(--bg-color);
+  padding: 1rem 2rem;
+  border-radius: 1.25rem;
+}
+
+.loader {
+  color: rgb(124, 124, 124);
+  font-family: "Poppins", sans-serif;
+  font-weight: 500;
+  font-size: 25px;
+  -webkit-box-sizing: content-box;
+  box-sizing: content-box;
+  height: 40px;
+  padding: 10px 10px;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  border-radius: 8px;
+}
+
+.words {
+  overflow: hidden;
+  position: relative;
+}
+
+.words::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(var(--bg-color) 10%,
+      transparent 30%,
+      transparent 70%,
+      var(--bg-color) 90%);
+  z-index: 20;
+}
+
+.word {
+  display: block;
+  height: 100%;
+  padding-left: 6px;
+  color: #956afa;
+  animation: spin_4991 4s infinite;
+}
+
+@keyframes spin_4991 {
+  10% {
+    -webkit-transform: translateY(-102%);
+    transform: translateY(-102%);
+  }
+
+  25% {
+    -webkit-transform: translateY(-100%);
+    transform: translateY(-100%);
+  }
+
+  35% {
+    -webkit-transform: translateY(-202%);
+    transform: translateY(-202%);
+  }
+
+  50% {
+    -webkit-transform: translateY(-200%);
+    transform: translateY(-200%);
+  }
+
+  60% {
+    -webkit-transform: translateY(-302%);
+    transform: translateY(-302%);
+  }
+
+  75% {
+    -webkit-transform: translateY(-300%);
+    transform: translateY(-300%);
+  }
+
+  85% {
+    -webkit-transform: translateY(-402%);
+    transform: translateY(-402%);
+  }
+
+  100% {
+    -webkit-transform: translateY(-400%);
+    transform: translateY(-400%);
+  }
+}
+
+
 /* Animación aplicada a los puntos del gradiente */
 #paint13_linear_163_1030 stop {
   animation: animateGradient 4s infinite alternate;
 }
-/* From Uiverse.io by Spacious74 */ 
+
+/* From Uiverse.io by Spacious74 */
 .laptop {
   transform: scale(0.8);
 }
+
 .screen {
   border-radius: 20px;
   box-shadow: inset 0 0 0 2px #c8cacb, inset 0 0 0 10px #000;
@@ -373,31 +470,32 @@ html {
   display: flex;
   align-items: center;
   justify-content: center;
-  background-image: linear-gradient(
-    15deg,
-    #3f51b1 0%,
-    #5a55ae 13%,
-    #7b5fac 25%,
-    #8f6aae 38%,
-    #a86aa4 50%,
-    #cc6b8e 62%,
-    #f18271 75%,
-    #f3a469 87%,
-    #f7c978 100%
-  );
+  background-image: linear-gradient(15deg,
+      #3f51b1 0%,
+      #5a55ae 13%,
+      #7b5fac 25%,
+      #8f6aae 38%,
+      #a86aa4 50%,
+      #cc6b8e 62%,
+      #f18271 75%,
+      #f3a469 87%,
+      #f7c978 100%);
   transform-style: preserve-3d;
   transform: perspective(1900px) rotateX(-88.5deg);
   transform-origin: 50% 100%;
   animation: open 4s infinite alternate;
 }
+
 @keyframes open {
   0% {
     transform: perspective(1900px) rotateX(-88.5deg);
   }
+
   100% {
     transform: perspective(1000px) rotateX(0deg);
   }
 }
+
 .screen::before {
   content: "";
   width: 518px;
@@ -416,6 +514,7 @@ html {
   letter-spacing: 1px;
   text-shadow: 0 0 5px #fff;
 }
+
 .header {
   width: 100px;
   height: 12px;
@@ -426,6 +525,7 @@ html {
   transform: translate(-50%, -0%);
   border-radius: 0 0 6px 6px;
 }
+
 .screen::after {
   background: linear-gradient(to bottom, #272727, #0d0d0d);
   border-radius: 0 0 20px 20px;
@@ -436,6 +536,7 @@ html {
   position: absolute;
   width: 514px;
 }
+
 .keyboard {
   background: radial-gradient(circle at center, #e2e3e4 85%, #a9abac 100%);
   border: solid #a0a3a7;
@@ -448,6 +549,7 @@ html {
   width: 620px;
   z-index: 9;
 }
+
 .keyboard::after {
   background: #e2e3e4;
   border-radius: 0 0 10px 10px;
@@ -460,6 +562,7 @@ html {
   top: 0;
   width: 120px;
 }
+
 .keyboard::before {
   background: 0 0;
   border-radius: 0 0 3px 3px;

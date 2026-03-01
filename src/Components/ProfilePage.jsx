@@ -43,7 +43,7 @@ function DeviceRow({ device, onSave, onDelete, onAddVariant }) {
   // Variant form state — pre-populate from parent device
   const [varForm, setVarForm] = useState({
     variant: '',
-    price: String(device.expected_price),
+    price: device.expected_price ? String(device.expected_price) : '',
     ram: device.ram || '',
     storage: device.storage || '',
     image: device.image_url || '',
@@ -71,15 +71,32 @@ function DeviceRow({ device, onSave, onDelete, onAddVariant }) {
 
   const handleAddVariant = async () => {
     if (!varForm.variant.trim()) return;
+
+    if (!baseName) {
+      alert("Invalid base model name. Cannot add variant.");
+      return;
+    }
+
+    if (!device.company) {
+      alert("Parent device is missing a company. Cannot add variant.");
+      return;
+    }
+
+    const parsedPrice = parseFloat(varForm.price);
+    if (isNaN(parsedPrice)) {
+      alert("Please enter a valid Price.");
+      return;
+    }
+
     setSaving(true);
     await onAddVariant({
       name: baseName,
-      company: device.company,
+      company: device.company || '',
       description: device.description || '',
       category: device.category || 'Smartphone',
       variant: varForm.variant.trim(),
-      expected_price: parseFloat(varForm.price),
-      actual_price: parseFloat(varForm.price),
+      expected_price: parsedPrice,
+      actual_price: parsedPrice,
       stock: parseInt(device.stock, 10) || 100,
       ram: varForm.ram,
       storage: varForm.storage,
@@ -89,7 +106,7 @@ function DeviceRow({ device, onSave, onDelete, onAddVariant }) {
     // Reset variant form for next use, keep base fields
     setVarForm({
       variant: '',
-      price: String(device.expected_price),
+      price: device.expected_price ? String(device.expected_price) : '',
       ram: device.ram || '',
       storage: device.storage || '',
       image: device.image_url || '',

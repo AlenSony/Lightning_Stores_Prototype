@@ -1,12 +1,17 @@
+* {
+  margin: 0;
+  padding: 0;
+}
+
 .login-wrapper {
   width: 100vw;
   height: 100vh;
-  background-color: #fff;
   position: relative;
   overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
+  margin-top: -100px;
 }
 
 .login-container {
@@ -172,6 +177,7 @@
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -183,7 +189,7 @@
   .login-card {
     padding: 40px 25px;
   }
-  
+
   .login-logo {
     font-size: 28px;
   }
