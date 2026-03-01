@@ -1,9 +1,11 @@
 import bcrypt from "bcrypt";
 import cookie from "cookie-parser";
 import cors from "cors";
+import crypto from "crypto";
 import dotenv from "dotenv";
 import express from "express";
 import jwt from "jsonwebtoken";
+import Razorpay from "razorpay";
 import dbConnect from "../database/db.js";
 import Device from "../models/device.js";
 import Order from "../models/order.js";
@@ -764,7 +766,8 @@ async function startServer() {
         }
 
         const { items, totalPrice } = req.body; // from frontend
-        if (!items || items.length === 0 || !totalPrice) {
+        if (!items || items.length === 0 || totalPrice === undefined || totalPrice === null) {
+          console.error("Checkout Validation Error: Items or totalPrice missing.", req.body);
           return res.status(400).json({ message: "Invalid checkout data" });
         }
 
@@ -795,8 +798,88 @@ async function startServer() {
         });
       }
     });
+    // POST /api/order/:id/razorpay - Generate Razorpay Order
+    app.post("/api/order/:id/razorpay", AuthMiddleware, async (req, res) => {
+      try {
 
-    // PATCH /api/order/:id/pay — mark an order as paid
+        const userId = req.user.userId;
+        const order = await Order.findById(req.params.id);
+        if (!order) return res.status(404).json({ message: "Order not found" });
+        if (String(order.user_id) !== String(userId)) return res.status(403).json({ message: "Not your order" });
+        if (order.payment_status === "paid" || order.paymentStatus === "paid") return res.status(400).json({ message: "Order already paid" });
+
+        const RAZORPAY_MAX_LIMIT_INR = 500000; // 5 Lakhs
+        const RAZORPAY_MIN_LIMIT_INR = 1;
+
+        let parsedPrice = Number(order.total_price);
+
+        if (isNaN(parsedPrice) || parsedPrice < RAZORPAY_MIN_LIMIT_INR) {
+          return res.status(400).json({
+            message: "Invalid transaction amount.",
+          });
+        }
+
+        if (parsedPrice > RAZORPAY_MAX_LIMIT_INR) {
+          return res.status(400).json({
+            message: `Cart total exceeds the maximum allowed transaction limit of ₹${RAZORPAY_MAX_LIMIT_INR.toLocaleString("en-IN")}. Please remove some items or contact support.`,
+          });
+        }
+
+        const instance = new Razorpay({
+          key_id: process.env.RAZORPAY_KEY_ID?.replace(/["']/g, "").trim(),
+          key_secret: process.env.RAZORPAY_KEY_SECRET?.replace(/["']/g, "").trim(),
+        });
+
+        const options = {
+          amount: Math.round(parsedPrice * 100),
+          currency: "INR",
+          receipt: order._id.toString(),
+        };
+
+
+        const razorpayOrder = await instance.orders.create(options);
+
+        res.status(200).json({
+          message: "Razorpay order created",
+          razorpayOrder,
+          keyId: process.env.RAZORPAY_KEY_ID?.replace(/["']/g, "").trim(),
+        });
+      } catch (err) {
+        console.error("Razorpay Error:", err);
+        res.status(500).json({ message: "Failed to create Razorpay order", error: err.message });
+      }
+    });
+
+    // POST /api/order/verify-payment - Verify signature and mark paid
+    app.post("/api/order/verify-payment", AuthMiddleware, async (req, res) => {
+      try {
+        const { order_id, razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
+
+        const generated_signature = crypto
+          .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET?.replace(/["']/g, "").trim() || "")
+          .update(razorpay_order_id + "|" + razorpay_payment_id)
+          .digest("hex");
+
+        if (generated_signature !== razorpay_signature) {
+          return res.status(400).json({ message: "Invalid payment signature" });
+        }
+
+        // Safely map ID formats and update DB
+        const orderId = order_id?._id || order_id;
+        const order = await Order.findById(orderId);
+        if (!order) return res.status(404).json({ message: "Order not found" });
+
+        order.payment_status = "paid";
+        // Optionally save razorpay_order_id and razorpay_payment_id inside order modal but simplified here
+        await order.save();
+
+        res.status(200).json({ message: "Payment verified successfully", order });
+      } catch (err) {
+        res.status(500).json({ message: "Internal server error", error: err.message });
+      }
+    });
+
+    // PATCH /api/order/:id/pay — legacy mark as paid
     app.patch("/api/order/:id/pay", AuthMiddleware, async (req, res) => {
       try {
         const userId = req.user.userId;

@@ -36,16 +36,16 @@ function NavBar() {
         const updatedCart = [...cart, product];
         setCart(updatedCart);
         setCartItems(updatedCart.length);
-        
+
         // Store cart in localStorage for persistence
         localStorage.setItem('cart', JSON.stringify(updatedCart));
-        
+
         showNotification(`${product.name} has been added to your cart!`, 'success');
-        
+
         // Trigger cart button animation
         setCartButtonAnimation(true);
         setTimeout(() => {
-          setCartButtonAnimation(false);
+            setCartButtonAnimation(false);
         }, 1000); // Match animation duration
     };
 
@@ -53,7 +53,7 @@ function NavBar() {
     const handleCartClick = () => {
         navigate('/cart');
     };
-    
+
     // Show aesthetic notification
     const showNotification = (message, type) => {
         setNotification({ show: true, message, type });
@@ -62,22 +62,22 @@ function NavBar() {
         }, 3000);
     };
 
-    return(
+    return (
         <div className="navbar">
             <img src="/logo.png" alt="Logo" />
             <div className="search-bar">
                 <div className="search-container">
                     <form onSubmit={handleSearch}>
-                        <input 
-                            name="product_search" 
-                            type="text" 
-                            placeholder="Search for products..." 
+                        <input
+                            name="product_search"
+                            type="text"
+                            placeholder="Search for products..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                         />
                         <button type="submit"><i className="fa-solid fa-magnifying-glass"></i></button>
                     </form>
-                    
+
                 </div>
                 <button onClick={handleCartClick} className={`cart-button ${cartButtonAnimation ? 'add-animation' : ''}`}>
                     <i className="fa-solid fa-cart-shopping"></i>
@@ -88,8 +88,8 @@ function NavBar() {
                 </Link>
             </div>
         </div>
-        
-        
+
+
     )
 }
 

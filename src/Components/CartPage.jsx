@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import '../Stylings/CartPage.css';
 import { useToast } from '../assets/Toast.jsx';
 import { getCart, removeFromCart, updateCartItemQuantity } from '../utils/cartUtils.js';
@@ -9,6 +9,7 @@ function CartPage() {
     const [totalPrice, setTotalPrice] = useState(0);
     const [refreshTrigger, setRefreshTrigger] = useState(0);
     const { showToast } = useToast();
+    const navigate = useNavigate();
 
     // 🛒 Load cart items
     useEffect(() => {
@@ -98,7 +99,7 @@ function CartPage() {
                 },
                 body: JSON.stringify({
                     userId: token,
-                    items: cartItems.map(item => ({ itemId: item.itemId, quantity: item.quantity })),
+                    items: cartItems.map(item => ({ itemId: item.itemId || item.id || item._id, quantity: item.quantity })),
                     totalPrice: totalWithTax,
                 }),
             });
@@ -106,6 +107,7 @@ function CartPage() {
                 showToast(`Proceeding to checkout! Total: ₹${totalWithTax.toFixed(2)}`, 'success');
                 setCartItems([]);
                 setTotalPrice(0);
+                navigate('/orders');
             }
             else {
                 showToast(`Failed to checkout! Total: ₹${totalWithTax.toFixed(2)}`, 'error');
@@ -210,9 +212,25 @@ function CartPage() {
                                     {new Date(Date.now() + 10 * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                                 </span>
                             </div>
-                            <button className="buy-now-btn" onClick={handleBuyNow}>
-                                Checkout securely
-                            </button>
+                            <div className="co-btn-wrapper" onClick={handleBuyNow}>
+                                <div className="co-left-side">
+                                    <div className="co-card">
+                                        <div className="co-card-line"></div>
+                                        <div className="co-buttons"></div>
+                                    </div>
+                                    <div className="co-post">
+                                        <div className="co-post-line"></div>
+                                        <div className="co-screen">
+                                            <div className="co-dollar">$</div>
+                                        </div>
+                                        <div className="co-numbers"></div>
+                                        <div className="co-numbers-line2"></div>
+                                    </div>
+                                </div>
+                                <div className="co-right-side">
+                                    <div className="co-new">Checkout</div>
+                                </div>
+                            </div>
                             <Link to="/main" className="continue-shopping-btn small">
                                 ← Continue Shopping
                             </Link>

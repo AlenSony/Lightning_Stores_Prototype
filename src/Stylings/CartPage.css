@@ -78,9 +78,10 @@
 /* ── Cart Container (Layout) ─────────────────────────────────────────────── */
 .cart-container {
     display: grid;
-    grid-template-columns: 1fr 400px;
+    grid-template-columns: minmax(0, 1fr) 400px;
     gap: 2.5rem;
     align-items: start;
+    max-width: 100%;
 }
 
 /* ── Cart Items List ─────────────────────────────────────────────────────── */
@@ -88,6 +89,7 @@
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
+    max-width: 100%;
 }
 
 /* Individual Item Card */
@@ -138,6 +140,7 @@
 .cart-item-info {
     flex: 1;
     min-width: 0;
+    max-width: 100%;
     /* for text ellipsis */
 }
 
@@ -317,32 +320,241 @@
     font-weight: 700;
 }
 
-/* Buy Now Button */
-.buy-now-btn {
+/* Checkout Button (Uiverse.io design by Pawelitto) */
+.co-btn-wrapper {
+    background-color: #ffffff;
+    display: flex;
+    width: 270px;
+    height: 100px;
+    margin: 1.5rem auto;
+    /* Center in summary pane */
+    position: relative;
+    border-radius: 8px;
+    transition: 0.3s ease-in-out;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+}
+
+.co-btn-wrapper:hover {
+    transform: scale(1.03);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.co-btn-wrapper:hover .co-left-side {
     width: 100%;
-    padding: 16px;
-    background: linear-gradient(135deg, #1F75FE 0%, #00BFFF 100%);
-    color: white;
-    border: none;
-    border-radius: 16px;
-    font-size: 1.1rem;
-    font-weight: 700;
+}
+
+.co-left-side {
+    background-color: #5de2a3;
+    width: 130px;
+    height: 100%;
+    border-radius: 6px;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     cursor: pointer;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-    box-shadow: 0 8px 24px rgba(31, 117, 254, 0.35);
-    margin: 1rem 0;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+    transition: 0.3s;
+    flex-shrink: 0;
+    overflow: hidden;
 }
 
-.buy-now-btn:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 14px 32px rgba(31, 117, 254, 0.5);
-    background: linear-gradient(135deg, #185ec9 0%, #00a1d6 100%);
+.co-right-side {
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    cursor: pointer;
+    justify-content: space-between;
+    white-space: nowrap;
+    transition: 0.3s;
+    flex: 1;
+    /* take up rest of button width */
 }
 
-.buy-now-btn:active {
-    transform: translateY(0);
+.co-right-side:hover {
+    background-color: #f9f7f9;
+}
+
+.co-new {
+    font-size: 20px;
+    font-weight: 700;
+    color: #333;
+    font-family: 'Inter', sans-serif;
+    margin-left: 20px;
+}
+
+.co-card {
+    width: 70px;
+    height: 46px;
+    background-color: #c7ffbc;
+    border-radius: 6px;
+    position: absolute;
+    display: flex;
+    z-index: 10;
+    flex-direction: column;
+    align-items: center;
+    box-shadow: 9px 9px 9px -2px rgba(77, 200, 143, 0.72);
+}
+
+.co-card-line {
+    width: 65px;
+    height: 13px;
+    background-color: #80ea69;
+    border-radius: 2px;
+    margin-top: 7px;
+}
+
+.co-buttons {
+    width: 8px;
+    height: 8px;
+    background-color: #379e1f;
+    box-shadow: 0 -10px 0 0 #26850e, 0 10px 0 0 #56be3e;
+    border-radius: 50%;
+    margin-top: 5px;
+    transform: rotate(90deg);
+    margin: 10px 0 0 -30px;
+}
+
+.co-btn-wrapper:hover .co-card {
+    animation: slide-top 1.2s cubic-bezier(0.645, 0.045, 0.355, 1) both;
+}
+
+@keyframes slide-top {
+    0% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-70px) rotate(90deg);
+    }
+
+    60% {
+        transform: translateY(-70px) rotate(90deg);
+    }
+
+    100% {
+        transform: translateY(-8px) rotate(90deg);
+    }
+}
+
+.co-post {
+    width: 63px;
+    height: 75px;
+    background-color: #dddde0;
+    position: absolute;
+    z-index: 11;
+    bottom: 10px;
+    top: 100px;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.co-post-line {
+    width: 47px;
+    height: 9px;
+    background-color: #545354;
+    position: absolute;
+    border-radius: 0px 0px 3px 3px;
+    right: 8px;
+    top: 8px;
+}
+
+.co-post-line:before {
+    content: "";
+    position: absolute;
+    width: 47px;
+    height: 9px;
+    background-color: #757375;
+    top: -8px;
+}
+
+.co-screen {
+    width: 47px;
+    height: 23px;
+    background-color: #ffffff;
+    position: absolute;
+    top: 22px;
+    right: 8px;
+    border-radius: 3px;
+}
+
+.co-dollar {
+    position: absolute;
+    font-size: 16px;
+    font-weight: 800;
+    width: 100%;
+    left: 0;
+    top: 0;
+    color: #4b953b;
+    text-align: center;
+}
+
+.co-numbers {
+    width: 12px;
+    height: 12px;
+    background-color: #838183;
+    box-shadow: 0 -18px 0 0 #838183, 0 18px 0 0 #838183;
+    border-radius: 2px;
+    position: absolute;
+    transform: rotate(90deg);
+    left: 25px;
+    top: 52px;
+}
+
+.co-numbers-line2 {
+    width: 12px;
+    height: 12px;
+    background-color: #aaa9ab;
+    box-shadow: 0 -18px 0 0 #aaa9ab, 0 18px 0 0 #aaa9ab;
+    border-radius: 2px;
+    position: absolute;
+    transform: rotate(90deg);
+    left: 25px;
+    top: 68px;
+}
+
+.co-btn-wrapper:hover .co-post {
+    animation: slide-post 1s cubic-bezier(0.165, 0.84, 0.44, 1) both;
+}
+
+@keyframes slide-post {
+    50% {
+        transform: translateY(0);
+    }
+
+    100% {
+        transform: translateY(-70px);
+    }
+}
+
+.co-btn-wrapper:hover .co-dollar {
+    animation: fade-in-fwd 0.3s 1s backwards;
+}
+
+@keyframes fade-in-fwd {
+    0% {
+        opacity: 0;
+        transform: translateY(-5px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media only screen and (max-width: 480px) {
+    .co-btn-wrapper {
+        transform: scale(0.9);
+    }
+
+    .co-btn-wrapper:hover {
+        transform: scale(0.94);
+    }
+
+    .co-new {
+        font-size: 18px;
+    }
 }
 
 /* Continue Shopping (summary) */
@@ -372,7 +584,7 @@
 /* ── Responsive Design ───────────────────────────────────────────────────── */
 @media (max-width: 1024px) {
     .cart-container {
-        grid-template-columns: 1fr 340px;
+        grid-template-columns: minmax(0, 1fr) 340px;
         gap: 2rem;
     }
 
@@ -383,7 +595,7 @@
 
 @media (max-width: 900px) {
     .cart-container {
-        grid-template-columns: 1fr;
+        grid-template-columns: minmax(0, 1fr);
     }
 
     .cart-summary {
