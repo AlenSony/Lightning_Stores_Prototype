@@ -888,7 +888,7 @@ async function startServer() {
         });
 
         const options = {
-          amount: Math.round(parsedPrice * 100),
+          amount: Math.round(parsedPrice),
           currency: "INR",
           receipt: order._id.toString(),
         };
@@ -971,7 +971,7 @@ async function startServer() {
           .json({ message: "Internal server error", error: err.message });
       }
     });
-  } catch (err) {}
+  } catch (err) { }
 }
 
 startServer();
